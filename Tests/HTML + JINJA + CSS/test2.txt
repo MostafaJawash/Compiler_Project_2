@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8"/>
+    <title>قائمة المنتجات</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+    <h1>قائمة المنتجات</h1>
+    <a href="{{ url_for('add_product') }}">إضافة منتج جديد</a>
+    <div class="products">
+        {% for product in products %}
+        <div class="product-card">
+            <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}"/>
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.price }}</p>
+            <a href="{{ url_for('product_detail', id=product.id) }}">التفاصيل</a>
+            <a href="{{ url_for('delete_product', id=product.id) }}">حذف</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

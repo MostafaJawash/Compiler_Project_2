@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<title>{{ title }}</title>
+<style>
+  body{
+    margin:0;
+    padding:20px;
+    font-family:sans-serif;
+    background:#f5f6f9;
+  }
+  .card{
+    background:#fff;
+    padding:16px;
+    border-radius:10px;
+    box-shadow:0 2px 8px ;
+    margin-bottom:12px;
+  }
+  .card h3{
+    margin:0 0 6px 0;
+    font-size:1.1rem;
+  }
+  .empty{
+    padding:20px;
+    text-align:center;
+    color:#777;
+  }
+</style>
+
+</head>
+<body>
+
+<h1>{{ title }}</h1>
+
+{% if items %}
+  {% for item in items %}
+    <div class="card">
+      <h3>{{ item.name }}</h3>
+      <p>{{ item.description }}</p>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="empty">No elements</div>
+{% endif %}
+
+</body>
+</html>

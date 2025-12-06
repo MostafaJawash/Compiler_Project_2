@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8"/>
+    <title>إضافة منتج</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}" />
+</head>
+<body>
+    <h1>إضافة منتج جديد</h1>
+    <form method="POST">
+        <label>اسم المنتج:</label>
+        <input type="text" name="name" required/><br/>
+        <label>السعر:</label>
+        <input type="text" name="price" required/><br/>
+        <label>الوصف:</label>
+        <textarea name="description" required></textarea><br/>
+        <label>رابط الصورة:</label>
+        <input type="text" name="image" placeholder="images/product3.jpg"/><br/>
+        <button type="submit">إضافة</button>
+    </form>
+</body>
+</html>
