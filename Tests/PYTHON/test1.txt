@@ -1,0 +1,102 @@
+from flask import Flask , render_template, request, redirect, url_for
+
+from products import products
+
+app = Flask ( __name__ )
+
+my_list = [
+    1,
+    2,
+    3
+]
+
+@app.route("/")
+def index():
+    return render_template("index.html", products=products)
+
+@app.route("/add", methods=["GET", "POST"])
+def add_product():
+    if request.method == "POST":
+        name = request.form["name"]
+        price = request.form["price"]
+        description = request.form["description"]
+        file = request.files["image"]
+        filename = file.filename
+        file.save("static/images/" + filename)
+        product_id = len(products) + 1
+        products.append({
+            "id": product_id,
+            "name": name,
+            "price": price,
+            "description": description,
+            "image": "images/" + filename
+        })
+        return redirect(url_for("index"))
+    return render_template("add_product.html")
+
+
+@app.route("/product/<int:id>")
+def product_detail(id):
+    product =None
+    for p in products:
+        if p["id"] == id:
+            product=p
+            break
+    if not product:
+        return "product not found", 404
+    return render_template("product_detail.html", product=product)
+
+@app.route("/delete/<int:id>")
+def delete_product(id):
+    global products
+    cnt=0
+    for p in products:
+        if p["id"] == id:
+            del products[cnt]
+            break
+        cnt+=1
+    return redirect(url_for("index"))
+
+#hhhhhhhhhhhhhhhh
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+def f():
+    cnt=0
+    while True:
+        cnt+=1
+        if cnt>10:
+            break
+    print(cnt)
+    q=2+(1*3-(4-3))
+
+yy=44
+print("""vv""")
+a=2**(1+4)
+#fffffffffffffffffffff
+n=2+3*4
+m=2**3**9
+
+products = [
+    {
+        "id": 1,
+        "name": "منتج تجريبي 1",
+        "price": "100 ريال",
+        "description": "وصف المنتج 1",
+        "image": "images/product1.jpg"
+    },
+    {
+        "id": 2,
+        "name": "منتج تجريبي 2",
+        "price": "150 ريال",
+        "description": "وصف المنتج 2",
+        "image": "images/product2.jpg"
+    }
+]
+x+=x+4
+print()
+def g():
+    v=w
+ok=9
