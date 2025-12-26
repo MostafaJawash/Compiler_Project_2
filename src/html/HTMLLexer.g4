@@ -1,5 +1,9 @@
 lexer grammar HTMLLexer;
 
+@header {
+package html.generated;
+}
+
 VARIABLE_START : '{{'  -> pushMode(JINJA);
 BLOCK_START    : '{%' -> pushMode(JINJA);
 COMMENT: '<!--' .*? '-->' -> skip;

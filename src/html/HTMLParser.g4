@@ -1,5 +1,9 @@
 parser grammar HTMLParser;
 
+@header {
+package html.generated;
+}
+
 options { tokenVocab=HTMLLexer; }
 
 htmlDocument

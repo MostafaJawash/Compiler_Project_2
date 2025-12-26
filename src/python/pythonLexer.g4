@@ -1,5 +1,10 @@
 lexer grammar pythonLexer;
 
+@header {
+package python.generated;
+}
+
+
 @lexer::members {
     // Queue of pending tokens (INDENT, DEDENT, NEWLINE)
     private java.util.LinkedList<Token> tokens = new java.util.LinkedList<>();
