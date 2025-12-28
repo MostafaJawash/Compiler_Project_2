@@ -1,9 +1,5 @@
 parser grammar HTMLParser;
 
-@header {
-package html.generated;
-}
-
 options { tokenVocab=HTMLLexer; }
 
 htmlDocument
@@ -20,8 +16,8 @@ htmlElement
     ;
 
 htmlContent
-   :(template | TEXT)* (htmlElement (template | TEXT)*)*
-   ;
+    : (template | TEXT | htmlElement)*
+    ;
 
 styleElement
     : OPEN_STYLE stylesheet CLOSE_STYLE
@@ -32,46 +28,39 @@ htmlAttribute
     ;
 
 attrValue
-   : JINJA_VAR_DQ (expr | exprMath | funCall | exprLogic)?  VARIABLE_END SPACE_ATT? (VJ_OPEN SPACE_ATT? (expr | exprMath | funCall | exprLogic )? SPACE_ATT? VARIABLE_END SPACE_ATT?)* DQ  #dqJINJA
-   | JINJA_VAR_SQ (expr | exprMath | funCall | exprLogic)?  VARIABLE_END SPACE_ATT? (VJ_OPEN SPACE_ATT? (expr | exprMath | funCall | exprLogic)? SPACE_ATT? VARIABLE_END SPACE_ATT?)* SQ  #sqJINJA
-   | ATTR_VALUE #attValue
-   ;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-template
-    : ( variable | block )+
+    : JINJA_VAR_DQ (expr | exprMath | funCall | exprLogic)? VARIABLE_END SPACE_ATT? (VJ_OPEN SPACE_ATT? (expr | exprMath | funCall | exprLogic )? SPACE_ATT? VARIABLE_END SPACE_ATT?)* DQ  #dqJINJA
+    | JINJA_VAR_SQ (expr | exprMath | funCall | exprLogic)? VARIABLE_END SPACE_ATT? (VJ_OPEN SPACE_ATT? (expr | exprMath | funCall | exprLogic)? SPACE_ATT? VARIABLE_END SPACE_ATT?)* SQ  #sqJINJA
+    | ATTR_VALUE #attValue
     ;
 
+template
+    : variable | block
+    ;
 
 variable
     : VARIABLE_START (expr | exprMath | funCall | exprLogic)? VARIABLE_END
     ;
 
-
 block
-    :forStmt #forBlock
-    | ifStmt #ifBlock
+    : forStmt #forBlock
+    | ifStmt  #ifBlock
     ;
 
-
 ifStmt
-    :BLOCK_START IF (expr | exprLogic)  BLOCK_END (template | htmlElement | TEXT)+ elifStm*  elseStm? BLOCK_START ENDIF BLOCK_END
+    : BLOCK_START IF (expr | exprLogic) BLOCK_END (htmlContent) elifStm* elseStm? BLOCK_START ENDIF BLOCK_END
     ;
 
 elifStm
-    :BLOCK_START ELIF (expr | exprLogic)  BLOCK_END (template | htmlElement | TEXT)+
+    : BLOCK_START ELIF (expr | exprLogic) BLOCK_END (htmlContent)
     ;
 
 elseStm
-    :BLOCK_START ELSE  BLOCK_END (template | htmlElement | TEXT)+
+    : BLOCK_START ELSE BLOCK_END (htmlContent)
     ;
-
 
 forStmt
-    :BLOCK_START FOR IDENTIFIER (COMMA IDENTIFIER)* IN ( IDENTIFIER(DOT IDENTIFIER)* | STRING | funCall )  BLOCK_END (template | htmlElement | TEXT)* BLOCK_START ENDFOR BLOCK_END
+    : BLOCK_START FOR IDENTIFIER (COMMA IDENTIFIER)* IN ( IDENTIFIER(DOT IDENTIFIER)* | STRING | funCall ) BLOCK_END (htmlContent) BLOCK_START ENDFOR BLOCK_END
     ;
-
 
 expr
     : IDENTIFIER (DOT IDENTIFIER)* #identefierEXPR
@@ -81,69 +70,78 @@ expr
     | NONE #noneEXPR
     ;
 
-
- exprMath
-     :OPEN_B exprMath CLOSE_B #bracketMathOperation
-     | exprMath MUL exprMath #mulOperation
-     | exprMath DIV exprMath #divOperation
-     | exprMath ADD exprMath #addOperation
-     | exprMath SUB exprMath #subOperation
-     | exprMath MOD exprMath #modOperation
-     | IDENTIFIER #idMath
-     | NUMBER #numberMath
-     ;
-
+exprMath
+    : OPEN_B exprMath CLOSE_B #bracketMathOperation
+    | exprMath MUL exprMath #mulOperation
+    | exprMath DIV exprMath #divOperation
+    | exprMath ADD exprMath #addOperation
+    | exprMath SUB exprMath #subOperation
+    | exprMath MOD exprMath #modOperation
+    | IDENTIFIER #idMath
+    | NUMBER #numberMath
+    ;
 
 funCall
-   : IDENTIFIER OPEN_B arguments? CLOSE_B
-   ;
+    : IDENTIFIER OPEN_B arguments? CLOSE_B
+    ;
 
 arguments
-   : argument (COMMA argument)*
-   ;
+    : argument (COMMA argument)*
+    ;
 
 argument
-   : arg #nonAssign
-   | IDENTIFIER(DOT IDENTIFIER)*(EQUAL valueFun)? #assign
-   ;
+    : arg #nonAssign
+    | IDENTIFIER(DOT IDENTIFIER)*(EQUAL valueFun)? #assign
+    ;
 
 arg
-   : (TRUE | FALSE) #boolArg
-   | NONE #noneArg
-   | NUMBER #numberArg
-   | STRING #strArg
-   | IDENTIFIER(DOT IDENTIFIER)* #idArg
-   ;
+    : (TRUE | FALSE) #boolArg
+    | NONE #noneArg
+    | NUMBER #numberArg
+    | STRING #strArg
+    | IDENTIFIER(DOT IDENTIFIER)* #idArg
+    ;
 
 valueFun
-   : (TRUE | FALSE) #boolVal
-   | NONE #noneVal
-   | NUMBER  #numberVal
-   | STRING #strVal
-   | IDENTIFIER(DOT IDENTIFIER)* #idValue
-   | exprMath #expMathVal
-   | funCall #funCallVal
-   ;
-
+    : (TRUE | FALSE) #boolVal
+    | NONE #noneVal
+    | NUMBER  #numberVal
+    | STRING #strVal
+    | IDENTIFIER(DOT IDENTIFIER)* #idValue
+    | exprMath #expMathVal
+    | funCall #funCallVal
+    ;
 
 exprLogic
-   : OPEN_B exprLogic CLOSE_B #bracketLogicOperation
-   | NOT logicalArg #notOperation
-   | logicalArg AND logicalArg #andOperation
-   | logicalArg OR logicalArg #orOperation
-   | logicalArg OPERATOR logicalArg #compareOperation
-   ;
+    : orExpr
+    ;
+
+orExpr
+    : andExpr (OR andExpr)*
+    ;
+
+andExpr
+    : notExpr (AND notExpr)*
+    ;
+
+notExpr
+    : NOT notExpr
+    | compareExpr
+    ;
+
+compareExpr
+    : OPEN_B exprLogic CLOSE_B
+    | logicalArg (OPERATOR logicalArg)?
+    ;
 
 logicalArg
-   :IDENTIFIER (DOT IDENTIFIER)* #idLogic
-   | STRING #strLogic
-   | (TRUE | FALSE) #boolLogic
-   | NONE #noneLogic
-   | NUMBER #numberLogic
-   | exprMath #exprMathLogic
-   ;
-
-//----------------------------------------------------------------------------------------------------------------------
+    : IDENTIFIER (DOT IDENTIFIER)* #idLogic
+    | STRING #strLogic
+    | (TRUE | FALSE) #boolLogic
+    | NONE #noneLogic
+    | NUMBER #numberLogic
+    | exprMath #exprMathLogic
+    ;
 
 stylesheet
     : ruleSet*

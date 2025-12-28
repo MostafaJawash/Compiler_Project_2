@@ -1,26 +1,27 @@
 lexer grammar HTMLLexer;
 
-@header {
-package html.generated;
-}
-
 VARIABLE_START : '{{'  -> pushMode(JINJA);
 BLOCK_START    : '{%' -> pushMode(JINJA);
+
 COMMENT: '<!--' .*? '-->' -> skip;
+
 WS: [ \t\r\n]+ -> skip;
 TEXT: ~[<{]+ ;
 DOC: '<!' -> pushMode(DOCTYPE);
 OPEN_STYLE: '<style>' -> pushMode(CSS);
 TAG_OPEN: '<' -> pushMode(TAG);
 
+//------------------------------------------------------------------------------------------
+
 mode TAG;
 SPACE_TAG: (' ' | '\t' | '\r'? '\n')+;
 TAG_CLOSE: '>' -> popMode;
 TAG_SLASH_CLOSE: '/>' -> popMode;
-
 TAG_SLASH: '/';
 EQUALS: '=' -> pushMode(ATTVALUE);
 TAG_NAME: [a-zA-Z][a-zA-Z0-9]*;
+
+//------------------------------------------------------------------------------------------
 
 mode ATTVALUE;
 SPACE_ATT: (' ' | '\t' | '\r'? '\n')+;
@@ -30,6 +31,8 @@ JINJA_VAR_SQ:  '\'{{' -> pushMode(JINJA);
 VJ_OPEN: '{{' -> pushMode(JINJA);
 DQ:  ["] ->popMode;
 SQ:  [']->popMode;
+
+//------------------------------------------------------------------------------------------
 
 mode DOCTYPE;
 SPACE_DOCTYPE: (' ' | '\t' | '\r'? '\n')+;
@@ -42,37 +45,39 @@ DOCTYPE_CLOSE: '>' -> popMode;
 mode JINJA;
 
 COMMENT_JINJA2 : '{#' .*? '#}' -> skip ;
-DOT : '.' ;
-COMMA: ',';
-EQUAL:'=';
+
 IF    : 'if' ;
 ELSE  : 'else' ;
-ELIF: 'elif';
+ELIF  : 'elif';
 ENDIF : 'endif' ;
 FOR   : 'for' ;
 IN    : 'in' ;
 ENDFOR: 'endfor' ;
-OPERATOR :  '!=' | '==' | '<=' | '>=' | BIGER | SMALLER;
-fragment BIGER: '>';
-fragment SMALLER: '<';
+AND   : 'and' ;
+OR    : 'or' ;
+NOT   : 'not' ;
+TRUE  : 'True' ;
+FALSE : 'False' ;
+NONE  : 'None' ;
+
+OPERATOR : '==' | '!=' | '<=' | '>=' | '>' | '<' ;
 MUL: '*';
 ADD: '+';
-AND: 'and';
-OR: 'or';
-NOT: 'not';
 SUB: '-';
-DIV:'/';
+DIV: '/';
 MOD: '%';
-TRUE: 'True';
-FALSE: 'False';
-NONE: 'None';
+DOT : '.' ;
+COMMA: ',';
+EQUAL: '=';
 OPEN_B: '(';
 CLOSE_B: ')';
-NUMBER : ([1-9]+ [0-9]* ('.' [0-9]+)?) | [0];
-STRING : '"' (~["\\] | '\\' .)* '"'
-       | '\'' (~['\\] | '\\' .)* '\'' ;
+
+NUMBER     : [0-9]+ ('.' [0-9]+)? ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
-WS_J: [ \t\r\n]+ -> skip;
+STRING     : '"' (~["\\] | '\\' .)* '"' | '\'' (~['\\] | '\\' .)* '\'' ;
+
+WS_J : [ \t\r\n]+ -> skip ;
+
 VARIABLE_END: '}}' -> popMode;
 BLOCK_END: '%}' -> popMode ;
 
