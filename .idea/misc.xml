@@ -16,40 +16,42 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/python/pythonParser.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\Lenovo\Compiler_Project\src\python\generated" />
+
+          <option name="outputDir" value="C:\Users\JUMBO_CO\Desktop\New folder (5)\Compiler_Project\src" />
+
           <option name="libDir" value="" />
           <option name="encoding" value="" />
-          <option name="pkg" value="" />
+          <option name="pkg" value="python.generated" />
           <option name="language" value="" />
           <option name="generateVisitor" value="true" />
         </PerGrammarGenerationSettings>
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/html/HTMLParser.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\Lenovo\Compiler_Project\src\python\generated" />
+
           <option name="libDir" value="" />
           <option name="encoding" value="" />
-          <option name="pkg" value="" />
-          <option name="language" value="" />
-          <option name="generateVisitor" value="true" />
-        </PerGrammarGenerationSettings>
-        <PerGrammarGenerationSettings>
-          <option name="fileName" value="$PROJECT_DIR$/src/python/pythonLexer.g4" />
-          <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\Lenovo\Compiler_Project\src\python\generated" />
-          <option name="libDir" value="" />
-          <option name="encoding" value="" />
-          <option name="pkg" value="" />
+          <option name="pkg" value="html.generated" />
           <option name="language" value="" />
           <option name="generateVisitor" value="true" />
         </PerGrammarGenerationSettings>
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/html/HTMLLexer.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\Lenovo\Compiler_Project\src\python\generated" />
+          <option name="outputDir" value="C:\Users\JUMBO_CO\Desktop\New folder (5)\Compiler_Project\src" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
-          <option name="pkg" value="" />
+          <option name="pkg" value="html.generated" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/src/python/pythonLexer.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\JUMBO_CO\Desktop\New folder (5)\Compiler_Project\src" />
+          <option name="libDir" value="" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="python.generated" />
           <option name="language" value="" />
           <option name="generateVisitor" value="true" />
         </PerGrammarGenerationSettings>
