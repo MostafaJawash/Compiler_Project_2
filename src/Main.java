@@ -98,8 +98,7 @@ public class Main {
         JScrollPane treeScroll = new JScrollPane(tree);
 
         tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node =
-                    (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             if (node == null) return;
 
             Object obj = node.getUserObject();
@@ -121,10 +120,8 @@ public class Main {
             codeArea.moveCaretPosition(stop);
         });
 
-        JSplitPane split =
-                new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
         split.setDividerLocation(450);
-
         frame.add(split);
         frame.setVisible(true);
     }
