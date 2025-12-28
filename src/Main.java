@@ -2,8 +2,12 @@ import python.ast.Program;
 import python.visitor.visitorAst;
 import python.generated.pythonLexer;
 import python.generated.pythonParser;
+
+import html.ast.Node;
+import html.visitor.AstBuilder;
 import html.generated.HTMLLexer;
 import html.generated.HTMLParser;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+
 
     static class NodeData {
         String label;
@@ -34,89 +39,105 @@ public class Main {
         }
     }
 
+
     public static void main(String[] args) throws IOException {
+
         String sourcePython = "Tests/PYTHON/test1.txt";
-        String code = Files.readString(Path.of(sourcePython));
-        CharStream input = CharStreams.fromString(code);
-        pythonLexer lexer = new pythonLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        pythonParser parser = new pythonParser(tokens);
-        ParseTree parseTree = parser.file_input();
-        visitorAst visitor = new visitorAst();
-        Program ast = (Program) visitor.visit(parseTree);
+        String pythonCode = Files.readString(Path.of(sourcePython));
+
+        CharStream pyInput = CharStreams.fromString(pythonCode);
+        pythonLexer pyLexer = new pythonLexer(pyInput);
+        CommonTokenStream pyTokens = new CommonTokenStream(pyLexer);
+        pythonParser pyParser = new pythonParser(pyTokens);
+
+        ParseTree pyTree = pyParser.file_input();
+        visitorAst pyVisitor = new visitorAst();
+        Program pyAst = (Program) pyVisitor.visit(pyTree);
+
         System.out.println("=== AST Python ===");
-        System.out.println(ast);
-        System.out.println("=================");
-        System.out.println();
-        System.out.println("=== Parse Tree Python ===");
-        System.out.println(parseTree.toStringTree(parser));
+        System.out.println(pyAst);
         System.out.println("=================");
 
-        System.out.println();
-        System.out.println();
-        System.out.println();
+        System.out.println("=== Parse Tree Python ===");
+        System.out.println(pyTree.toStringTree(pyParser));
+        System.out.println("=================");
 
         String sourceHtml = "Tests/HTML + JINJA + CSS/test1.txt";
-        String codeHtml = Files.readString(Path.of(sourceHtml));
-        CharStream inputHtml = CharStreams.fromString(codeHtml);
-        HTMLLexer lexerHtml = new HTMLLexer(inputHtml);
-        CommonTokenStream tokensHtml = new CommonTokenStream(lexerHtml);
-        HTMLParser parserHtml = new HTMLParser(tokensHtml);
-        ParseTree parseTreeHtml = parserHtml.htmlDocument();
-        System.out.println("=== Parse Tree HTML ===");
-        System.out.println(parseTreeHtml.toStringTree(parserHtml));
-        System.out.println("=================");
+        String htmlCode = Files.readString(Path.of(sourceHtml));
 
-        showParseTree(codeHtml, parseTreeHtml,parserHtml);//html
-        showParseTree(code, parseTree,parser);//python
+        CharStream htmlInput = CharStreams.fromString(htmlCode);
+        HTMLLexer htmlLexer = new HTMLLexer(htmlInput);
+        CommonTokenStream htmlTokens = new CommonTokenStream(htmlLexer);
+        HTMLParser htmlParser = new HTMLParser(htmlTokens);
 
+        ParseTree htmlTree = htmlParser.htmlDocument();
 
-        /*int test=0;
-        for (int i = 0; i < tokens.size(); i++) {
-            Token t = tokens.get(i);
-            String text = t.getText();
-            if (t.getType() == pythonLexer.INDENT){ text = "INDENT"; test++;}
-            else if (t.getType() == pythonLexer.DEDENT) {text = "DEDENT"; test--;}
-            else if (t.getType() == pythonLexer.NEWLINE) text = "NEWLINE";
-            System.out.println(text);
+        AstBuilder htmlVisitor = new AstBuilder();
+        Node htmlAst = htmlVisitor.visit(htmlTree);
+
+        System.out.println("=== AST HTML ===");
+        if (htmlAst != null) {
+            System.out.println(htmlAst.prettyPrint(0));
         }
-        System.out.println(test);*/
+        System.out.println("================");
+
+        System.out.println("=== Parse Tree HTML ===");
+        System.out.println(htmlTree.toStringTree(htmlParser));
+        System.out.println("================");
+
+        /* -------- GUI -------- */
+        showParseTree(pythonCode, pyTree, pyParser);
+        showParseTree(htmlCode, htmlTree, htmlParser);
     }
 
-    private static void showParseTree(String code,ParseTree parseTree,Parser parser){
-        JFrame frame = new JFrame("ANTLR Tree Code (Highlight Statement)");
+
+    private static void showParseTree(String code, ParseTree parseTree, Parser parser) {
+        JFrame frame = new JFrame("ANTLR Parse Tree Viewer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1200, 750);
+
         JTextArea codeArea = new JTextArea(code);
         codeArea.setFont(new Font("Consolas", Font.PLAIN, 14));
         codeArea.setEditable(false);
+
         JScrollPane codeScroll = new JScrollPane(codeArea);
-        JTree tree = new JTree(new DefaultTreeModel(buildNode(parseTree,parser)));
+        JTree tree = new JTree(new DefaultTreeModel(buildNode(parseTree, parser)));
         expandAll(tree);
+
         JScrollPane treeScroll = new JScrollPane(tree);
-        JTree finalTree = tree;
-        tree.addTreeSelectionListener(e -> {DefaultMutableTreeNode node = (DefaultMutableTreeNode) finalTree.getLastSelectedPathComponent();
+
+        tree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode node =
+                    (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             if (node == null) return;
+
             Object obj = node.getUserObject();
             if (!(obj instanceof NodeData data)) return;
-            ParseTree pt = data.tree;
-            List<Token> tokensList = new ArrayList<>();
-            collectTokens(pt, tokensList);
-            if (tokensList.isEmpty()) return;
-            int startIndex = tokensList.get(0).getStartIndex();
-            int stopIndex  = tokensList.get(tokensList.size() - 1).getStopIndex() + 1;
-            int docLen = codeArea.getDocument().getLength();
-            startIndex = Math.min(startIndex, docLen);
-            stopIndex  = Math.min(stopIndex, docLen);
+
+            List<Token> tokens = new ArrayList<>();
+            collectTokens(data.tree, tokens);
+            if (tokens.isEmpty()) return;
+
+            int start = tokens.get(0).getStartIndex();
+            int stop = tokens.get(tokens.size() - 1).getStopIndex() + 1;
+
+            int len = codeArea.getDocument().getLength();
+            start = Math.min(start, len);
+            stop = Math.min(stop, len);
+
             codeArea.requestFocus();
-            codeArea.setCaretPosition(startIndex);
-            codeArea.moveCaretPosition(stopIndex);
+            codeArea.setCaretPosition(start);
+            codeArea.moveCaretPosition(stop);
         });
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
+
+        JSplitPane split =
+                new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
         split.setDividerLocation(450);
+
         frame.add(split);
         frame.setVisible(true);
     }
+
 
     private static DefaultMutableTreeNode buildNode(ParseTree tree, Parser parser) {
         String label;
@@ -125,17 +146,22 @@ public class Main {
         } else {
             label = tree.getText();
         }
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(new NodeData(label, tree));
+
+        DefaultMutableTreeNode node =
+                new DefaultMutableTreeNode(new NodeData(label, tree));
+
         for (int i = 0; i < tree.getChildCount(); i++) {
             node.add(buildNode(tree.getChild(i), parser));
         }
         return node;
     }
+
     private static void expandAll(JTree tree) {
         for (int i = 0; i < tree.getRowCount(); i++) {
             tree.expandRow(i);
         }
     }
+
     private static void collectTokens(ParseTree tree, List<Token> tokens) {
         if (tree instanceof TerminalNode tn) {
             Token tok = tn.getSymbol();
