@@ -6,7 +6,7 @@ import html.generated.HTMLLexer;
 import html.generated.HTMLParser;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-
+import python.symbolTable.SymbolTable;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -44,6 +44,10 @@ public class Main {
         ParseTree parseTree = parser.file_input();
         visitorAst visitor = new visitorAst();
         Program ast = (Program) visitor.visit(parseTree);
+        System.out.println();
+        System.out.println("=== Symbol Table Results ===");
+        visitor.symbolTable.printTable();
+        System.out.println("============================");
         System.out.println("=== AST Python ===");
         System.out.println(ast);
         System.out.println("=================");
@@ -145,4 +149,5 @@ public class Main {
             collectTokens(tree.getChild(i), tokens);
         }
     }
+
 }
