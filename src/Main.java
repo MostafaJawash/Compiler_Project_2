@@ -67,6 +67,9 @@ public class Main {
         ParseTree htmlTree = htmlParser.htmlDocument();
         AstBuilder htmlVisitor = new AstBuilder();
         Node htmlAst = htmlVisitor.visit(htmlTree);
+        System.out.println("=== HTML Symbol Table ===");
+        htmlVisitor.htmlST.printTable();
+        System.out.println("=========================");
         System.out.println("=== AST HTML ===");
         if (htmlAst != null) {
             System.out.println(htmlAst.prettyPrint(0));
