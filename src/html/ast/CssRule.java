@@ -1,21 +1,21 @@
 package html.ast;
-import java.util.List;
-import java.util.stream.Collectors;
 
-public class CssRule implements Node {
-    private final String selector;
+import java.util.List;
+
+public class CssRule extends BaseAstNode {
     private final List<CssDeclaration> declarations;
-    public CssRule(String selector, List<CssDeclaration> declarations) {
-        this.selector = selector;
+
+    public CssRule(List<CssDeclaration> declarations, int line) {
+        super(line);
         this.declarations = declarations;
     }
 
     @Override
     public String prettyPrint(int indent) {
-        String indentStr = " ".repeat(indent);
-        String decls = declarations.stream()
-                .map(d -> d.prettyPrint(indent + 2))
-                .collect(Collectors.joining("\n"));
-        return String.format("%sRule: %s {\n%s\n%s}", indentStr, selector, decls, indentStr);
+        StringBuilder sb = new StringBuilder();
+        sb.append(header("CssRule", indent));
+        for (var decl : declarations) sb.append(decl.prettyPrint(indent + 2));
+        sb.append(footer(indent));
+        return sb.toString();
     }
 }

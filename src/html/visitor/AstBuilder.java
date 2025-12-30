@@ -4,10 +4,9 @@ import html.ast.*;
 import html.generated.HTMLParser;
 import html.generated.HTMLParserBaseVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNodeImpl;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,209 +16,256 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitHtmlDocument(HTMLParser.HtmlDocumentContext ctx) {
         List<Node> body = new ArrayList<>();
         if (ctx.htmlElement() != null) {
-            body.add(visit(ctx.htmlElement()));
+            Node element = visit(ctx.htmlElement());
+            if (element != null) body.add(element);
         }
-        return new Program(body);
+        return new Program(body, ctx.getStart().getLine());
     }
-    @Override
-    public Node visitFunCall(HTMLParser.FunCallContext ctx) {
-        String funcName = ctx.IDENTIFIER().getText();
-        return new TextNode("FunctionCall: " + funcName);
-    }
+
     @Override
     public Node visitHtmlElement(HTMLParser.HtmlElementContext ctx) {
-        if (ctx.styleElement() != null) {
-            return visit(ctx.styleElement());
-        }
+        if (ctx.styleElement() != null) return visit(ctx.styleElement());
 
         String tagName = ctx.TAG_NAME(0).getText();
+
         List<HtmlAttribute> attributes = ctx.htmlAttribute().stream()
-                .map(attrCtx -> (HtmlAttribute) visit(attrCtx))
+                .map(a -> (HtmlAttribute) visit(a))
                 .collect(Collectors.toList());
 
-        List<Node> children = (ctx.htmlContent() != null)
-                ? ((ContentNode) visit(ctx.htmlContent())).getChildren()
-                : Collections.emptyList();
-
-        return new HtmlElement(tagName, attributes, children);
-    }
-
-    @Override
-    public Node visitHtmlContent(HTMLParser.HtmlContentContext ctx) {
         List<Node> children = new ArrayList<>();
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            var child = ctx.getChild(i);
-            if (child instanceof TerminalNodeImpl) {
-                children.add(new TextNode(child.getText()));
-            } else {
-                Node visited = visit(child);
-                if (visited != null) children.add(visited);
+        if (ctx.htmlContent() != null) {
+            for (int i = 0; i < ctx.htmlContent().getChildCount(); i++) {
+                Node child = visit(ctx.htmlContent().getChild(i));
+                if (child != null) children.add(child);
             }
         }
-        return new ContentNode(children);
-    }
-    @Override
-    public Node visitForBlock(HTMLParser.ForBlockContext ctx) {
-        String loopVar = ctx.forStmt().IDENTIFIER(0).getText();
-        String iterable = ctx.forStmt().getChild(4).getText();
-        List<Node> body = ((ContentNode) visit(ctx.forStmt().htmlContent())).getChildren();
-        return new JinjaForBlock(loopVar, iterable, body);
+
+        return new HtmlElement(tagName, attributes, children, ctx.getStart().getLine());
     }
 
     @Override
-    public Node visitIfBlock(HTMLParser.IfBlockContext ctx) {
-        String condition = ctx.ifStmt().getChild(2).getText();
-        List<Node> body = ((ContentNode) visit(ctx.ifStmt().htmlContent())).getChildren();
+    public Node visitHtmlAttribute(HTMLParser.HtmlAttributeContext ctx) {
+        String name = ctx.TAG_NAME() != null ? ctx.TAG_NAME().getText() : "";
+        Node valueNode = null;
 
-        List<Node> elseBody = null;
-        if (ctx.ifStmt().elseStm() != null) {
-            elseBody = ((ContentNode) visit(ctx.ifStmt().elseStm().htmlContent())).getChildren();
+        if (ctx.attrValue() != null) {
+            var attrCtx = ctx.attrValue();
+            if (attrCtx instanceof HTMLParser.DqJINJAContext ||
+                    attrCtx instanceof HTMLParser.SqJINJAContext) {
+                ParseTree jinjaContent = attrCtx.getChild(1);
+                valueNode = visit(jinjaContent);
+            } else {
+                String val = attrCtx.getText().replaceAll("^['\"]|['\"]$", "");
+                valueNode = new TextNode(val, ctx.getStart().getLine());
+            }
         }
-
-        return new JinjaIfBlock(condition, body, elseBody);
+        return new HtmlAttribute(name, valueNode, ctx.getStart().getLine());
     }
 
 
     @Override
     public Node visitVariable(HTMLParser.VariableContext ctx) {
-        return visit(ctx.getChild(1));
+        Node content = visit(ctx.getChild(1));
+        return new JinjaExpressionNode(content, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFunCall(HTMLParser.FunCallContext ctx) {
+        String functionName = ctx.IDENTIFIER().getText();
+        List<Node> arguments = new ArrayList<>();
+        if (ctx.arguments() != null) {
+            for (var argCtx : ctx.arguments().argument()) {
+                arguments.add(visit(argCtx));
+            }
+        }
+        return new FunctionNode(functionName, arguments, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitNonAssign(HTMLParser.NonAssignContext ctx) {
+        return new ArgumentNode(null, visit(ctx.getChild(0)), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitAssign(HTMLParser.AssignContext ctx) {
+        String argName = ctx.IDENTIFIER(0).getText();
+        Node value = ctx.valueFun() != null ? visit(ctx.valueFun()) : null;
+        return new ArgumentNode(argName, value, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitStrArg(HTMLParser.StrArgContext ctx) {
+        return new TextNode(ctx.STRING().getText(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIdArg(HTMLParser.IdArgContext ctx) {
+        return buildIdentifier(ctx.IDENTIFIER(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIdValue(HTMLParser.IdValueContext ctx) {
+        return buildIdentifier(ctx.IDENTIFIER(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIdMath(HTMLParser.IdMathContext ctx) {
+        return buildIdentifier(ctx.IDENTIFIER(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIdLogic(HTMLParser.IdLogicContext ctx) {
+        List<TerminalNode> ids = ctx.getTokens(HTMLParser.IDENTIFIER);
+        return buildIdentifier(ids, ctx.getStart().getLine());
+    }
+
+    private Node buildIdentifier(List<TerminalNode> ids, int line) {
+        if (ids.size() == 1) return new IdentifierNode(ids.get(0).getText(), line);
+        Node base = new IdentifierNode(ids.get(0).getText(), line);
+        return new MemberAccessNode(base, ids.get(1).getText(), line);
+    }
+
+    private Node buildIdentifier(TerminalNode id, int line) {
+        return new IdentifierNode(id.getText(), line);
+    }
+
+    @Override
+    public Node visitTerminal(TerminalNode node) {
+        if (node.getSymbol().getType() == HTMLParser.TEXT) {
+            String text = node.getText().trim();
+            if (!text.isEmpty()) return new TextNode(text, node.getSymbol().getLine());
+        }
+        return null;
+    }
+
+    @Override
+    public Node visitForBlock(HTMLParser.ForBlockContext ctx) {
+        List<Node> body = new ArrayList<>();
+        if (ctx.forStmt().htmlContent() != null) {
+            for (int i = 0; i < ctx.forStmt().htmlContent().getChildCount(); i++) {
+                Node child = visit(ctx.forStmt().htmlContent().getChild(i));
+                if (child != null) body.add(child);
+            }
+        }
+        return new JinjaForBlock(body, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIfBlock(HTMLParser.IfBlockContext ctx) {
+        List<Node> body = new ArrayList<>();
+        List<Node> elseBody = new ArrayList<>();
+
+        if (ctx.ifStmt().htmlContent() != null) {
+            for (int i = 0; i < ctx.ifStmt().htmlContent().getChildCount(); i++) {
+                Node child = visit(ctx.ifStmt().htmlContent().getChild(i));
+                if (child != null) body.add(child);
+            }
+        }
+
+        if (ctx.ifStmt().elseStm() != null && ctx.ifStmt().elseStm().htmlContent() != null) {
+            for (int i = 0; i < ctx.ifStmt().elseStm().htmlContent().getChildCount(); i++) {
+                Node child = visit(ctx.ifStmt().elseStm().htmlContent().getChild(i));
+                if (child != null) elseBody.add(child);
+            }
+        }
+
+        return new JinjaIfBlock(body, elseBody, ctx.getStart().getLine());
+    }
+
+
+    @Override
+    public Node visitStyleElement(HTMLParser.StyleElementContext ctx) {
+        Stylesheet sheet = ctx.stylesheet() != null ? (Stylesheet) visit(ctx.stylesheet()) : null;
+        return new StyleElement(sheet, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitStylesheet(HTMLParser.StylesheetContext ctx) {
+        List<CssRule> rules = new ArrayList<>();
+        for (var ruleCtx : ctx.ruleSet()) {
+            rules.add((CssRule) visit(ruleCtx));
+        }
+        return new Stylesheet(rules, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitRuleSet(HTMLParser.RuleSetContext ctx) {
+        List<CssDeclaration> decls = new ArrayList<>();
+        for (var declCtx : ctx.declaration()) {
+            decls.add((CssDeclaration) visit(declCtx));
+        }
+        return new CssRule(decls, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDeclaration(HTMLParser.DeclarationContext ctx) {
+        return new CssDeclaration(ctx.getStart().getLine());
     }
 
 
     @Override
     public Node visitAddOperation(HTMLParser.AddOperationContext ctx) {
-        Node left = visit(ctx.exprMath(0));
-        Node right = visit(ctx.exprMath(1));
-        if (left == null || right == null) return new TextNode("Error: Math expression incomplete");
-        return new ArithmeticNode(ctx.getChild(1).getText(), left, right);
+        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSubOperation(HTMLParser.SubOperationContext ctx) {
+        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
     }
 
     @Override
     public Node visitMulOperation(HTMLParser.MulOperationContext ctx) {
-        Node left = visit(ctx.exprMath(0));
-        Node right = visit(ctx.exprMath(1));
-        return new ArithmeticNode(ctx.getChild(1).getText(), left, right);
+        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
     }
 
     @Override
-    public Node visitIdMath(HTMLParser.IdMathContext ctx) {
-        return new IdentifierNode(ctx.IDENTIFIER().getText());
+    public Node visitDivOperation(HTMLParser.DivOperationContext ctx) {
+        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
     }
 
     @Override
-    public Node visitNumberMath(HTMLParser.NumberMathContext ctx) {
-        return new NumberNode(ctx.NUMBER().getText());
+    public Node visitModOperation(HTMLParser.ModOperationContext ctx) {
+        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
     }
-
-
 
     @Override
     public Node visitBracketMathOperation(HTMLParser.BracketMathOperationContext ctx) {
-        return visit(ctx.exprMath());
+        return visit(ctx.getChild(1)); // expr inside parentheses
     }
 
-    @Override
-    public Node visitTemplate(HTMLParser.TemplateContext ctx) {
-        return visit(ctx.getChild(0));
-    }
 
-    @Override
-    public Node visitHtmlAttribute(HTMLParser.HtmlAttributeContext ctx) {
-        String name = ctx.TAG_NAME().getText();
-        String value = (ctx.attrValue() != null) ? ctx.attrValue().getText() : "";
-
-        if (value.startsWith("\"") && value.endsWith("\"") || value.startsWith("'") && value.endsWith("'")) {
-            value = value.substring(1, value.length() - 1);
-        }
-
-        return new HtmlAttribute(name, value);
-    }
-    @Override
-    public Node visitSubOperation(HTMLParser.SubOperationContext ctx) {
-        Node left = visit(ctx.exprMath(0));
-        Node right = visit(ctx.exprMath(1));
-        return new ArithmeticNode("-", left, right);
-    }@Override
-    public Node visitNumberLogic(HTMLParser.NumberLogicContext ctx) {
-        return new NumberNode(ctx.NUMBER().getText());
-    }
-
-    @Override
-    public Node visitBoolLogic(HTMLParser.BoolLogicContext ctx) {
-        return new TextNode(ctx.getText()); // أو إنشاء BooleanNode
-    }
-
-    @Override
-    public Node visitNoneLogic(HTMLParser.NoneLogicContext ctx) {
-        return new TextNode("None");
-    }
-    @Override
-    public Node visitAndExpr(HTMLParser.AndExprContext ctx) {
-        Node left = visit(ctx.notExpr(0));
-        Node right = visit(ctx.notExpr(1));
-        return new LogicNode("and", left, right);
-    }
     @Override
     public Node visitOrExpr(HTMLParser.OrExprContext ctx) {
-        Node left = visit(ctx.andExpr(0));
-        Node right = visit(ctx.andExpr(1));
-        return new LogicNode("or", left, right);
+        Node left = visit(ctx.getChild(0));
+        Node right = ctx.getChildCount() > 2 ? visit(ctx.getChild(2)) : null;
+        return new LogicNode(left, right, ctx.getStart().getLine());
     }
+
+    @Override
+    public Node visitAndExpr(HTMLParser.AndExprContext ctx) {
+        Node left = visit(ctx.getChild(0));
+        Node right = ctx.getChildCount() > 2 ? visit(ctx.getChild(2)) : null;
+        return new LogicNode(left, right, ctx.getStart().getLine());
+    }
+
     @Override
     public Node visitNotExpr(HTMLParser.NotExprContext ctx) {
-        Node expr = visit(ctx.notExpr());
-        return new LogicNode("not", expr, null);
+        Node value = visit(ctx.getChild(1));
+        return new LogicNode(value, null, ctx.getStart().getLine());
     }
+
     @Override
     public Node visitCompareExpr(HTMLParser.CompareExprContext ctx) {
-        if (ctx.OPERATOR() == null) {
-            return visit(ctx.logicalArg(0));
-        }
-
-        Node left = visit(ctx.logicalArg(0));
-        Node right = visit(ctx.logicalArg(1));
-        return new LogicNode(ctx.OPERATOR().getText(), left, right);
+        Node left = visit(ctx.getChild(0));
+        Node right = visit(ctx.getChild(2));
+        return new LogicNode(left, right, ctx.getStart().getLine());
     }
 
+
+
+    
     @Override
-    public Node visitIdLogic(HTMLParser.IdLogicContext ctx) {
-        return new IdentifierNode(ctx.getText());
-    }
-    @Override
-    public Node visitStyleElement(HTMLParser.StyleElementContext ctx) {
-        Stylesheet stylesheet = (Stylesheet) visit(ctx.stylesheet());
-        return new StyleElement(stylesheet);
-    }
-
-    @Override
-    public Node visitStylesheet(HTMLParser.StylesheetContext ctx) {
-        List<CssRule> rules = ctx.ruleSet().stream()
-                .map(ruleCtx -> (CssRule) visit(ruleCtx))
-                .collect(Collectors.toList());
-        return new Stylesheet(rules);
-    }
-
-    @Override
-    public Node visitRuleSet(HTMLParser.RuleSetContext ctx) {
-        String selector = ctx.selector().getText();
-        List<CssDeclaration> declarations = ctx.declaration().stream()
-                .map(declCtx -> (CssDeclaration) visit(declCtx))
-                .collect(Collectors.toList());
-        return new CssRule(selector, declarations);
-    }
-
-    @Override
-    public Node visitDeclaration(HTMLParser.DeclarationContext ctx) {
-        String property = ctx.property().getText();
-        String value = ctx.value().getText();
-        return new CssDeclaration(property, value);
-    }
-
-    private static class ContentNode implements Node {
-        private final List<Node> children;
-        public ContentNode(List<Node> children) { this.children = children; }
-        public List<Node> getChildren() { return children; }
-        @Override
-        public String prettyPrint(int indent) { return ""; }
+    public Node visitNumberMath(HTMLParser.NumberMathContext ctx) {
+        return new NumberNode(ctx.getStart().getLine());
     }
 }
