@@ -21,7 +21,7 @@ public class ForStmtNode extends CompoundStmt {
     @Override
     public String toString(int level) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent(level)).append("ForStmt [line=").append(lineNumber).append(", node name=").append(name.getClass().getSimpleName()).append("]\n");
+        sb.append(indent(level)).append("ForStmt [line=").append(lineNumber).append(", node name=").append(name).append("]\n");
         sb.append(indent(level)).append("{\n");
         sb.append(indent(level + 1)).append("var:\n");
         if (var != null)

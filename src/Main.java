@@ -1,4 +1,5 @@
 import python.ast.Program;
+import python.symbolTable.Symbol;
 import python.visitor.visitorAst;
 import python.generated.pythonLexer;
 import python.generated.pythonParser;
@@ -76,6 +77,12 @@ public class Main {
         System.out.println(htmlTree.toStringTree(htmlParser));
         System.out.println("================");
 
+        pyVisitor.symbolTable.printTable();
+        Symbol symbol=pyVisitor.symbolTable.lookup("cnt");
+        if(symbol==null)
+            System.out.println("NULL");
+        else
+            System.out.println(symbol.line);
         /* -------- GUI -------- */
         showParseTree(pythonCode, pyTree, pyParser);
         showParseTree(htmlCode, htmlTree, htmlParser);
@@ -135,8 +142,7 @@ public class Main {
             label = tree.getText();
         }
 
-        DefaultMutableTreeNode node =
-                new DefaultMutableTreeNode(new NodeData(label, tree));
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(new NodeData(label, tree));
 
         for (int i = 0; i < tree.getChildCount(); i++) {
             node.add(buildNode(tree.getChild(i), parser));
