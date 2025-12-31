@@ -1,15 +1,21 @@
 package html.ast;
-import java.util.List;
-import java.util.stream.Collectors;
 
-public class Stylesheet implements Node {
+import java.util.List;
+
+public class Stylesheet extends BaseAstNode {
     private final List<CssRule> rules;
-    public Stylesheet(List<CssRule> rules) { this.rules = rules; }
+
+    public Stylesheet(List<CssRule> rules, int line) {
+        super(line);
+        this.rules = rules;
+    }
 
     @Override
     public String prettyPrint(int indent) {
-        return rules.stream()
-                .map(r -> r.prettyPrint(indent))
-                .collect(Collectors.joining("\n"));
+        StringBuilder sb = new StringBuilder();
+        sb.append(header("Stylesheet", indent));
+        for (var rule : rules) sb.append(rule.prettyPrint(indent + 2));
+        sb.append(footer(indent));
+        return sb.toString();
     }
 }
