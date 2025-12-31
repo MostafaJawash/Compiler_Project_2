@@ -3,6 +3,7 @@ package html.visitor;
 import html.ast.*;
 import html.generated.HTMLParser;
 import html.generated.HTMLParserBaseVisitor;
+import html.symbolTable.HtmlSymbolTable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 
@@ -11,8 +12,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
+public class AstBuilder extends HTMLParserBaseVisitor<Node> {
+    public HtmlSymbolTable htmlST = new HtmlSymbolTable();
     @Override
     public Node visitHtmlDocument(HTMLParser.HtmlDocumentContext ctx) {
         List<Node> body = new ArrayList<>();
@@ -33,6 +35,8 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         }
 
         String tagName = ctx.TAG_NAME(0).getText();
+        htmlST.pushScope(tagName);
+
         List<HtmlAttribute> attributes = ctx.htmlAttribute().stream()
                 .map(attrCtx -> (HtmlAttribute) visit(attrCtx))
                 .collect(Collectors.toList());
@@ -40,7 +44,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         List<Node> children = (ctx.htmlContent() != null)
                 ? ((ContentNode) visit(ctx.htmlContent())).getChildren()
                 : Collections.emptyList();
-
+        htmlST.popScope();
         return new HtmlElement(tagName, attributes, children);
     }
 
@@ -62,7 +66,10 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitForBlock(HTMLParser.ForBlockContext ctx) {
         String loopVar = ctx.forStmt().IDENTIFIER(0).getText();
         String iterable = ctx.forStmt().getChild(4).getText();
+        htmlST.pushScope("For_Loop");
+        htmlST.addSymbol(loopVar, "Jinja_LoopVar", iterable, ctx.getStart().getLine());
         List<Node> body = ((ContentNode) visit(ctx.forStmt().htmlContent())).getChildren();
+        htmlST.popScope();
         return new JinjaForBlock(loopVar, iterable, body);
     }
 
@@ -127,7 +134,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitHtmlAttribute(HTMLParser.HtmlAttributeContext ctx) {
         String name = ctx.TAG_NAME().getText();
         String value = (ctx.attrValue() != null) ? ctx.attrValue().getText() : "";
-
+        htmlST.addSymbol(name, "HTML_Attribute", value, ctx.getStart().getLine());
         if (value.startsWith("\"") && value.endsWith("\"") || value.startsWith("'") && value.endsWith("'")) {
             value = value.substring(1, value.length() - 1);
         }
@@ -212,6 +219,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitDeclaration(HTMLParser.DeclarationContext ctx) {
         String property = ctx.property().getText();
         String value = ctx.value().getText();
+        htmlST.addSymbol(property, "CSS_Property", value, ctx.getStart().getLine());
         return new CssDeclaration(property, value);
     }
 
