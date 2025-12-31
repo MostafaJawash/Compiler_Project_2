@@ -68,8 +68,7 @@ public class Main {
         ParseTree htmlTree = htmlParser.htmlDocument();
         AstBuilder htmlVisitor = new AstBuilder();
         Node htmlAst = htmlVisitor.visit(htmlTree);
-        System.out.println("=== HTML Symbol Table ===");
-        htmlVisitor.htmlST.printTable();
+
         System.out.println("=========================");
         System.out.println("=== AST HTML ===");
         if (htmlAst != null) {
@@ -86,6 +85,9 @@ public class Main {
             System.out.println("NULL");
         else
             System.out.println(symbol.line);
+        System.out.println();
+        System.out.println("=== HTML Symbol Table ===");
+        htmlVisitor.htmlST.printTable();
         /* -------- GUI -------- */
         showParseTree(pythonCode, pyTree, pyParser);
         showParseTree(htmlCode, htmlTree, htmlParser);

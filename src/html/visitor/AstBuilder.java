@@ -42,6 +42,10 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
             }
         }
 
+        ArrayList attributes=new ArrayList();
+        for(int i=0;i<ctx.htmlAttribute().size();i++){
+            attributes.add(visit(ctx.htmlAttribute(i)));
+        }
         return new HtmlElement(tagName, attributes, children, ctx.getStart().getLine());
 
     }
@@ -166,7 +170,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 Node child = visit(ctx.ifStmt().htmlContent().getChild(i));
                 if (child != null) body.add(child);
             }
-=======
+
 
         }
 
@@ -273,7 +277,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
 
 
-    
+
     @Override
     public Node visitNumberMath(HTMLParser.NumberMathContext ctx) {
         return new NumberNode(ctx.getStart().getLine());
