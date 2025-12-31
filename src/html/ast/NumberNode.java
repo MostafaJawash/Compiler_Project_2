@@ -1,14 +1,10 @@
 package html.ast;
 
-public class NumberNode implements Node {
-    private final String value;
-
-    public NumberNode(String value) {
-        this.value = value;
-    }
+public class NumberNode extends BaseAstNode {
+    public NumberNode(int line) { super(line); }
 
     @Override
     public String prettyPrint(int indent) {
-        return " ".repeat(indent) + "Number: " + value;
+        return header("NumberNode", indent) + footer(indent);
     }
 }

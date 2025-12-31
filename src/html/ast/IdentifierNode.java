@@ -1,14 +1,15 @@
 package html.ast;
 
-public class IdentifierNode implements Node {
+public class IdentifierNode extends BaseAstNode {
     private final String name;
 
-    public IdentifierNode(String name) {
+    public IdentifierNode(String name, int line) {
+        super(line);
         this.name = name;
     }
 
     @Override
     public String prettyPrint(int indent) {
-        return " ".repeat(indent) + "Identifier: " + name;
+        return indent(indent) + "IdentifierNode: " + name + " [line=" + line + "]\n";
     }
 }

@@ -1,20 +1,17 @@
 package html.ast;
-import java.util.List;
 
-public class StyleElement extends HtmlElement {
+public class StyleElement extends BaseAstNode {
     private final Stylesheet stylesheet;
 
-    public StyleElement(Stylesheet stylesheet) {
-        super("style", List.of(), List.of());
+    public StyleElement(Stylesheet stylesheet, int line) {
+        super(line);
         this.stylesheet = stylesheet;
     }
 
     @Override
     public String prettyPrint(int indent) {
-        String indentStr = " ".repeat(indent);
-        return String.format("%s<StyleElement>\n%s",
-                indentStr,
-                stylesheet.prettyPrint(indent + 2)
-        );
+        return header("StyleElement", indent)
+                + stylesheet.prettyPrint(indent + 2)
+                + footer(indent);
     }
 }
