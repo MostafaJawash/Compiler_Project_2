@@ -1,4 +1,4 @@
-// Generated from C:/Users/JUMBO_CO/Desktop/New folder (5)/Compiler_Project/src/python/pythonParser.g4 by ANTLR 4.13.2
+// Generated from C:/Compiler_Project/src/python/pythonParser.g4 by ANTLR 4.13.2
 package python.generated;
 
 

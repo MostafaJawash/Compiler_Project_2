@@ -1,5 +1,4 @@
 package python.visitor;
-
 import python.generated.pythonParser;
 import python.generated.pythonParserBaseVisitor;
 import python.ast.ASTNode;
@@ -13,11 +12,13 @@ import python.ast.SimpleStmt.*;
 import python.ast.Statement;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-
+import python.symbolTable.SymbolTable;
+import python.symbolTable.Symbol;
 import java.util.ArrayList;
 import java.util.List;
 
 public class visitorAst extends pythonParserBaseVisitor {
+    public SymbolTable symbolTable = new SymbolTable(null); // إنشاء الجدول العام
 
     @Override
     public Program visitFile_input(pythonParser.File_inputContext ctx) {
@@ -113,11 +114,16 @@ public class visitorAst extends pythonParserBaseVisitor {
     @Override
     public ASTNode visitAssignment_multiple(pythonParser.Assignment_multipleContext ctx) {
         int line = ctx.getStart().getLine();
+        for (pythonParser.TargetContext t : ctx.target()) {
+            String varName = t.getText();
+            symbolTable.insert(varName, "Variable", line);
+        }
         ArrayList<IdentifierNode> targets = new ArrayList<>();
         for (pythonParser.TargetContext t : ctx.target()) {
             targets.add((IdentifierNode) visit(t));
         }
         Expr value = (Expr) visit(ctx.value_stmt());
+
         return new AssignmentNode(line, targets, AssignmentNode.Operator.ASSIGN, value);
     }
 
@@ -547,15 +553,19 @@ public class visitorAst extends pythonParserBaseVisitor {
         return new ImportNode(fromModule, namesWithAliases, line);
     }
 
-
     @Override
     public ASTNode visitFun_def(pythonParser.Fun_defContext ctx) {
-        IdentifierNode name = new IdentifierNode(ctx.getStart().getLine(), ctx.IDENTIFIER().getText());
+        int line = ctx.getStart().getLine();
+        String funcName = ctx.IDENTIFIER().getText();
+        symbolTable.insert(funcName, "Function", line);
+        IdentifierNode name = new IdentifierNode(line, funcName);
         ArrayList<Pair<Expr, Expr>> arg = null;
         if (ctx.arguments() != null)
             arg = (ArrayList<Pair<Expr, Expr>>) visit(ctx.arguments());
+
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
-        return new FunDefNode(ctx.getStart().getLine(), name, arg, body);
+
+        return new FunDefNode(line, name, arg, body);
     }
 
     @Override
@@ -680,14 +690,16 @@ public class visitorAst extends pythonParserBaseVisitor {
 
     @Override
     public ASTNode visitFor_stmt(pythonParser.For_stmtContext ctx) {
-
         int line = ctx.getStart().getLine();
-        IdentifierNode var = new IdentifierNode(line, ctx.IDENTIFIER(0).getText());
+        String loopVarName = ctx.IDENTIFIER(0).getText();
+        symbolTable.insert(loopVarName, "Loop Variable", line);
+        IdentifierNode var = new IdentifierNode(line, loopVarName);
         int idx = 1;
         while (idx < ctx.IDENTIFIER().size() && ctx.getChild(idx * 2).getText().equals(".")) {
             var.addParts(new FieldAccess(line, ctx.IDENTIFIER(idx).getText()));
             idx++;
         }
+
         Expr inExpr;
         if (ctx.STRING() != null) {
             inExpr = new Atom(ctx.STRING().getSymbol().getLine(), "string", ctx.STRING().getText());
@@ -701,7 +713,9 @@ public class visitorAst extends pythonParserBaseVisitor {
             }
             inExpr = inIdentifier;
         }
+
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
+
         return new ForStmtNode(line, var, inExpr, body);
     }
 

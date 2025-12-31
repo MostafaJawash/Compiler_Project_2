@@ -10,7 +10,7 @@ import html.generated.HTMLParser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-
+import python.symbolTable.SymbolTable;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -44,43 +44,37 @@ public class Main {
 
         String sourcePython = "Tests/PYTHON/test1.txt";
         String pythonCode = Files.readString(Path.of(sourcePython));
-
         CharStream pyInput = CharStreams.fromString(pythonCode);
         pythonLexer pyLexer = new pythonLexer(pyInput);
         CommonTokenStream pyTokens = new CommonTokenStream(pyLexer);
         pythonParser pyParser = new pythonParser(pyTokens);
-
         ParseTree pyTree = pyParser.file_input();
         visitorAst pyVisitor = new visitorAst();
         Program pyAst = (Program) pyVisitor.visit(pyTree);
-
         System.out.println("=== AST Python ===");
         System.out.println(pyAst);
         System.out.println("=================");
-
         System.out.println("=== Parse Tree Python ===");
         System.out.println(pyTree.toStringTree(pyParser));
         System.out.println("=================");
 
         String sourceHtml = "Tests/HTML + JINJA + CSS/test1.txt";
         String htmlCode = Files.readString(Path.of(sourceHtml));
-
         CharStream htmlInput = CharStreams.fromString(htmlCode);
         HTMLLexer htmlLexer = new HTMLLexer(htmlInput);
         CommonTokenStream htmlTokens = new CommonTokenStream(htmlLexer);
         HTMLParser htmlParser = new HTMLParser(htmlTokens);
-
         ParseTree htmlTree = htmlParser.htmlDocument();
-
         AstBuilder htmlVisitor = new AstBuilder();
         Node htmlAst = htmlVisitor.visit(htmlTree);
-
+        System.out.println("=== HTML Symbol Table ===");
+        htmlVisitor.htmlST.printTable();
+        System.out.println("=========================");
         System.out.println("=== AST HTML ===");
         if (htmlAst != null) {
             System.out.println(htmlAst.prettyPrint(0));
         }
         System.out.println("================");
-
         System.out.println("=== Parse Tree HTML ===");
         System.out.println(htmlTree.toStringTree(htmlParser));
         System.out.println("================");
@@ -107,8 +101,7 @@ public class Main {
         JScrollPane treeScroll = new JScrollPane(tree);
 
         tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node =
-                    (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             if (node == null) return;
 
             Object obj = node.getUserObject();
@@ -130,10 +123,8 @@ public class Main {
             codeArea.moveCaretPosition(stop);
         });
 
-        JSplitPane split =
-                new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
         split.setDividerLocation(450);
-
         frame.add(split);
         frame.setVisible(true);
     }
@@ -171,4 +162,7 @@ public class Main {
             collectTokens(tree.getChild(i), tokens);
         }
     }
+
+
 }
+
