@@ -22,7 +22,10 @@ public class FunctionNode extends BaseAstNode {
         if (!arguments.isEmpty()) {
             sb.append(pad).append("  Parameters:\n");
             for (Node arg : arguments) {
-                sb.append(arg.prettyPrint(indent + 4));
+                if (arg != null)
+                    sb.append(arg.prettyPrint(indent + 4));
+                else
+                    sb.append(pad).append("    <null argument>\n");
             }
         }
         return sb.toString();

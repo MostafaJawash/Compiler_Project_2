@@ -57,26 +57,54 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
         if (ctx.attrValue() != null) {
             var attrCtx = ctx.attrValue();
-            if (attrCtx instanceof HTMLParser.DqJINJAContext ||
-                    attrCtx instanceof HTMLParser.SqJINJAContext) {
-                ParseTree jinjaContent = attrCtx.getChild(1);
-                valueNode = visit(jinjaContent);
+            if (attrCtx instanceof HTMLParser.DqJINJAContext || attrCtx instanceof HTMLParser.SqJINJAContext) {
+                for (int i = 1; i < attrCtx.getChildCount() - 1; i++) {
+                    Node child = visit(attrCtx.getChild(i));
+                    if (child != null) {
+                        valueNode = child;
+                        break;
+                    }
+                }
             } else {
                 String val = attrCtx.getText().replaceAll("^['\"]|['\"]$", "");
                 valueNode = new TextNode(val, ctx.getStart().getLine());
             }
         }
+
         return new HtmlAttribute(name, valueNode, ctx.getStart().getLine());
     }
+
+
 
 
     @Override
 
     public Node visitVariable(HTMLParser.VariableContext ctx) {
-        Node content = visit(ctx.getChild(1));
-        return new JinjaExpressionNode(content, ctx.getStart().getLine());
-
+        if (ctx.getChildCount() >= 3) {
+            Node expression = visit(ctx.getChild(1));
+            return new JinjaExpressionNode(expression, ctx.getStart().getLine());
+        }
+        return new JinjaExpressionNode(null, ctx.getStart().getLine());
     }
+
+    @Override
+    public Node visitIdentefierEXPR(HTMLParser.IdentefierEXPRContext ctx) {
+        List<TerminalNode> ids = ctx.IDENTIFIER();
+        return buildIdentifier(ids, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitNumberEXPR(HTMLParser.NumberEXPRContext ctx) {
+        return new NumberNode(ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitStringEXPR(HTMLParser.StringEXPRContext ctx) {
+        String text = ctx.STRING().getText().replaceAll("^['\"]|['\"]$", "");
+        return new TextNode(text, ctx.getStart().getLine());
+    }
+
+
 
     @Override
     public Node visitFunCall(HTMLParser.FunCallContext ctx) {
@@ -97,9 +125,25 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
     @Override
     public Node visitAssign(HTMLParser.AssignContext ctx) {
-        String argName = ctx.IDENTIFIER(0).getText();
-        Node value = ctx.valueFun() != null ? visit(ctx.valueFun()) : null;
-        return new ArgumentNode(argName, value, ctx.getStart().getLine());
+        StringBuilder fullName = new StringBuilder();
+        for (int i = 0; i < ctx.IDENTIFIER().size(); i++) {
+            fullName.append(ctx.IDENTIFIER(i).getText());
+            if (i < ctx.IDENTIFIER().size() - 1) fullName.append(".");
+        }
+
+        Node value = null;
+        if (ctx.valueFun() != null) {
+            value = visit(ctx.valueFun());
+        }
+
+        return new ArgumentNode(fullName.toString(), value, ctx.getStart().getLine());
+    }
+    @Override
+    public Node visitStrVal(HTMLParser.StrValContext ctx) {
+        String text = ctx.STRING().getText();
+        String cleanText = text.replaceAll("^['\"]|['\"]$", "");
+
+        return new TextNode(cleanText, ctx.getStart().getLine());
     }
 
     @Override
@@ -202,18 +246,29 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
     @Override
     public Node visitRuleSet(HTMLParser.RuleSetContext ctx) {
+        String selector = ctx.selector().getText();
+
         List<CssDeclaration> decls = new ArrayList<>();
         for (var declCtx : ctx.declaration()) {
-            decls.add((CssDeclaration) visit(declCtx));
+            CssDeclaration decl = (CssDeclaration) visit(declCtx);
+            if (decl != null) decls.add(decl);
         }
-        return new CssRule(decls, ctx.getStart().getLine());
+
+        return new CssRule(selector, decls, ctx.getStart().getLine());
     }
 
     @Override
     public Node visitDeclaration(HTMLParser.DeclarationContext ctx) {
-        return new CssDeclaration(ctx.getStart().getLine());
-    }
 
+        String property = ctx.property().getText();
+        String value = ctx.value().getText();
+
+        return new CssDeclaration(
+                property,
+                value,
+                ctx.getStart().getLine()
+        );
+    }
 
     @Override
     public Node visitAddOperation(HTMLParser.AddOperationContext ctx) {

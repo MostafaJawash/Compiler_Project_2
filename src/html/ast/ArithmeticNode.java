@@ -12,9 +12,21 @@ public class ArithmeticNode extends BaseAstNode {
 
     @Override
     public String prettyPrint(int indent) {
-        return header("ArithmeticNode", indent)
-                + left.prettyPrint(indent + 2)
-                + right.prettyPrint(indent + 2)
-                + footer(indent);
+        StringBuilder sb = new StringBuilder();
+        sb.append(header("ArithmeticNode", indent));
+
+        if (left != null)
+            sb.append(left.prettyPrint(indent + 2));
+        else
+            sb.append(indent(indent + 2)).append("<null left>\n");
+
+        if (right != null)
+            sb.append(right.prettyPrint(indent + 2));
+        else
+            sb.append(indent(indent + 2)).append("<null right>\n");
+
+        sb.append(footer(indent));
+        return sb.toString();
     }
+
 }

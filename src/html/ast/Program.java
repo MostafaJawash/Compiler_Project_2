@@ -14,7 +14,10 @@ public class Program extends BaseAstNode {
     public String prettyPrint(int indent) {
         StringBuilder sb = new StringBuilder();
         sb.append("Program [line=").append(line).append("]\n{\n");
-        for (var node : body) sb.append(node.prettyPrint(2));
+        for (var node : body) {
+            if (node != null)
+                sb.append(node.prettyPrint(2));
+        }
         sb.append("}\n");
         return sb.toString();
     }
