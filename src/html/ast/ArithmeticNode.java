@@ -1,31 +1,44 @@
 package html.ast;
 
 public class ArithmeticNode extends BaseAstNode {
+
+    public enum Operator {
+        ADD, SUB, MUL, DIV, MOD
+    }
+
     private final Node left;
     private final Node right;
+    private final Operator operator;
 
-    public ArithmeticNode(Node left, Node right, int line) {
+    public ArithmeticNode(Node left, Node right, Operator operator, int line) {
         super(line);
         this.left = left;
         this.right = right;
+        this.operator = operator;
     }
 
     @Override
     public String prettyPrint(int indent) {
+        String pad = indent(indent);
         StringBuilder sb = new StringBuilder();
-        sb.append(header("ArithmeticNode", indent));
 
-        if (left != null)
+        sb.append(pad)
+                .append("ArithmeticNode (")
+                .append(operator)
+                .append(")\n");
+
+        if (left != null) {
             sb.append(left.prettyPrint(indent + 2));
-        else
-            sb.append(indent(indent + 2)).append("<null left>\n");
+        } else {
+            sb.append(pad).append("  <left: null>\n");
+        }
 
-        if (right != null)
+        if (right != null) {
             sb.append(right.prettyPrint(indent + 2));
-        else
-            sb.append(indent(indent + 2)).append("<null right>\n");
+        } else {
+            sb.append(pad).append("  <right: null>\n");
+        }
 
-        sb.append(footer(indent));
         return sb.toString();
     }
 

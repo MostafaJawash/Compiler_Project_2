@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8"/>
+    <title>إضافة منتج</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+    <h1>إضافة منتج جديد</h1>
+
+    <form method="POST">
+        <label>اسم المنتج:</label>
+        <input type="text" name="name" required/><br/>
+
+        <label>السعر:</label>
+        <input type="text" name="price" required/><br/>
+
+        <label>الوصف:</label>
+        <textarea name="description" required></textarea><br/>
+
+        <label>رابط الصورة:</label>
+        <input type="text" name="image" placeholder="images/product3.jpg"/><br/>
+
+        <button type="submit">إضافة</button>
+    </form>
+
+    <hr/>
+
+    <!-- ====== exprMath TEST AREA ====== -->
+    <h2>اختبار exprMath</h2>
+
+    <p>جمع بسيط:</p>
+    <p>{{ 10 + 5 }}</p>
+
+    <p>أولوية العمليات (ضرب قبل الجمع):</p>
+    <p>{{ 10 + 5 * 2 }}</p>
+
+    <p>أقواس:</p>
+    <p>{{ (10 + 5) * 2 }}</p>
+
+    <p>باقي القسمة:</p>
+    <p>{{ 17 % 3 }}</p>
+
+    <p>متغيرات مع حساب:</p>
+    <p>{{ price + 10 }}</p>
+
+    <p>  جمع ارقام :</p>
+    <p>{{ 20 + 10 }}</p>
+
+    <p>عملية مركبة:</p>
+    <p>{{ (price + tax) * quantity }}</p>
+
+</body>
+</html>
