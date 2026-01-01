@@ -5,13 +5,17 @@ public class TextNode extends BaseAstNode {
 
     public TextNode(String text, int line) {
         super(line);
-        this.text = text.trim();
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
     }
 
     @Override
-    public String prettyPrint(int indent) {
-        if (text.isEmpty()) return "";
-        String pad = indent(indent);
-        return pad + "TextNode \"" + text + "\" [line=" + line + "]\n";
+    public String prettyPrint(int level) {
+        String display = text.trim();
+        if (display.isEmpty()) return "";
+        return indent(level) + "TextNode: \"" + display + "\"\n";
     }
 }

@@ -9,7 +9,6 @@ public class ArgumentNode extends BaseAstNode {
         this.argName = argName;
         this.value = value;
     }
-
     @Override
     public String prettyPrint(int indent) {
         String pad = indent(indent);
@@ -22,12 +21,17 @@ public class ArgumentNode extends BaseAstNode {
         }
 
         if (value != null) {
-            sb.append(pad).append("  value: \n");
-            sb.append(value.prettyPrint(indent + 4));
+            sb.append(pad).append("  value: ");
+            if (value instanceof TextNode textNode) {
+                sb.append("\"").append(textNode.getText()).append("\"\n");
+            } else {
+                sb.append("\n").append(value.prettyPrint(indent + 4));
+            }
         } else {
             sb.append(pad).append("  value: null\n");
         }
 
         return sb.toString();
     }
+
 }

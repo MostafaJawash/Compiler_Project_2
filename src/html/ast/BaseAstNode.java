@@ -1,7 +1,6 @@
 package html.ast;
 
 public abstract class BaseAstNode implements Node {
-
     protected final int line;
 
     protected BaseAstNode(int line) {
@@ -13,15 +12,15 @@ public abstract class BaseAstNode implements Node {
         return line;
     }
 
-    protected String indent(int indent) {
-        return "  ".repeat(indent);
+    protected String indent(int level) {
+        return "    ".repeat(level);
     }
 
-    protected String header(String name, int indent) {
-        return indent(indent) + name + " [line=" + line + "]\n" + indent(indent) + "{\n";
+    protected String header(String name, int level) {
+        return indent(level) + name + " [line " + line + "]\n" + indent(level) + "{\n";
     }
 
-    protected String footer(int indent) {
-        return indent(indent) + "}\n";
+    protected String footer(int level) {
+        return indent(level) + "}\n";
     }
 }

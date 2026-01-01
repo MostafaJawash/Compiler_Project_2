@@ -15,25 +15,21 @@ public class HtmlElement extends BaseAstNode {
     }
 
     @Override
-    public String prettyPrint(int indent) {
-        String pad = indent(indent);
+    public String prettyPrint(int level) {
         StringBuilder sb = new StringBuilder();
-        sb.append(header("HtmlElement", indent));
-        sb.append(pad).append("  tag: ").append(tagName).append("\n");
+        sb.append(header("HtmlElement <" + tagName + ">", level));
 
         if (!attributes.isEmpty()) {
-            sb.append(pad).append("  attributes:\n").append(pad).append("  {\n");
-            for (var attr : attributes) sb.append(attr.prettyPrint(indent + 2));
-            sb.append(pad).append("  }\n");
+            sb.append(indent(level + 1)).append("Attributes:\n");
+            for (var attr : attributes) sb.append(attr.prettyPrint(level + 2));
         }
 
         if (!children.isEmpty()) {
-            sb.append(pad).append("  children:\n").append(pad).append("  {\n");
-            for (var child : children) sb.append(child.prettyPrint(indent + 2));
-            sb.append(pad).append("  }\n");
+            sb.append(indent(level + 1)).append("Children:\n");
+            for (var child : children) sb.append(child.prettyPrint(level + 2));
         }
 
-        sb.append(footer(indent));
+        sb.append(footer(level));
         return sb.toString();
     }
 }
