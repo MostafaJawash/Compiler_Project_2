@@ -13,3 +13,4 @@ public class IdentifierNode extends BaseAstNode {
         return indent(indent) + "IdentifierNode: " + name + " [line=" + line + "]\n";
     }
 }
+

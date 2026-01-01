@@ -17,6 +17,8 @@ public class HtmlAttribute extends BaseAstNode {
 
         if (value != null) {
             valStr = value.prettyPrint(0).trim();
+        } else {
+            valStr = "<null>";
         }
 
         return pad + "HtmlAttribute [line=" + line + "] { name: " + name +

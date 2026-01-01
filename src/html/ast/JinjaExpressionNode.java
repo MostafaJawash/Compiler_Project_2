@@ -12,8 +12,19 @@ public class JinjaExpressionNode extends BaseAstNode {
     public String prettyPrint(int indent) {
         String pad = indent(indent);
         StringBuilder sb = new StringBuilder();
-        sb.append(pad).append("JinjaExpression {{ ... }} [line=").append(line).append("]\n");
-        sb.append(expressionContent.prettyPrint(indent + 4));
+
+        sb.append(pad)
+                .append("JinjaExpression {{ ... }} [line=")
+                .append(line)
+                .append("]\n");
+
+        if (expressionContent != null) {
+            sb.append(expressionContent.prettyPrint(indent + 4));
+        } else {
+            sb.append(pad).append("    <empty expression>\n");
+        }
+
         return sb.toString();
     }
+
 }
