@@ -3,6 +3,7 @@ package html.visitor;
 import html.ast.*;
 import html.generated.HTMLParser;
 import html.generated.HTMLParserBaseVisitor;
+import html.symbolTable.HtmlSymbolTable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -10,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
+public class AstBuilder extends HTMLParserBaseVisitor<Node> {
+    public HtmlSymbolTable htmlST = new HtmlSymbolTable();
     @Override
     public Node visitHtmlDocument(HTMLParser.HtmlDocumentContext ctx) {
         List<Node> body = new ArrayList<>();
@@ -28,9 +30,9 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
         String tagName = ctx.TAG_NAME(0).getText();
 
-        List<HtmlAttribute> attributes = ctx.htmlAttribute().stream()
-                .map(a -> (HtmlAttribute) visit(a))
-                .collect(Collectors.toList());
+        htmlST.pushScope(tagName);
+
+
 
         List<Node> children = new ArrayList<>();
         if (ctx.htmlContent() != null) {
@@ -40,7 +42,12 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
             }
         }
 
+        ArrayList attributes=new ArrayList();
+        for(int i=0;i<ctx.htmlAttribute().size();i++){
+            attributes.add(visit(ctx.htmlAttribute(i)));
+        }
         return new HtmlElement(tagName, attributes, children, ctx.getStart().getLine());
+
     }
 
     @Override
@@ -71,6 +78,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
 
     @Override
+
     public Node visitVariable(HTMLParser.VariableContext ctx) {
         if (ctx.getChildCount() >= 3) {
             Node expression = visit(ctx.getChild(1));
@@ -196,6 +204,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     }
 
     @Override
+
     public Node visitIfBlock(HTMLParser.IfBlockContext ctx) {
         List<Node> body = new ArrayList<>();
         List<Node> elseBody = new ArrayList<>();
@@ -205,6 +214,8 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 Node child = visit(ctx.ifStmt().htmlContent().getChild(i));
                 if (child != null) body.add(child);
             }
+
+
         }
 
         if (ctx.ifStmt().elseStm() != null && ctx.ifStmt().elseStm().htmlContent() != null) {
@@ -305,9 +316,11 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     }
 
     @Override
+
     public Node visitNotExpr(HTMLParser.NotExprContext ctx) {
         Node value = visit(ctx.getChild(1));
         return new LogicNode(value, null, ctx.getStart().getLine());
+
     }
 
     @Override
