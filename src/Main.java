@@ -43,7 +43,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        String sourcePython = "Tests/PYTHON/test1.txt";
+        String sourcePython = "Tests/PYTHON/Final tests/app.txt";
         String pythonCode = Files.readString(Path.of(sourcePython));
         CharStream pyInput = CharStreams.fromString(pythonCode);
         pythonLexer pyLexer = new pythonLexer(pyInput);
@@ -59,7 +59,7 @@ public class Main {
         System.out.println(pyTree.toStringTree(pyParser));
         System.out.println("=================");
 
-        String sourceHtml = "Tests/HTML + JINJA + CSS/test1.txt";
+        String sourceHtml = "Tests/HTML + JINJA + CSS/Final tests/index.txt";
         String htmlCode = Files.readString(Path.of(sourceHtml));
         CharStream htmlInput = CharStreams.fromString(htmlCode);
         HTMLLexer htmlLexer = new HTMLLexer(htmlInput);
@@ -170,7 +170,5 @@ public class Main {
             collectTokens(tree.getChild(i), tokens);
         }
     }
-
-
 }
 

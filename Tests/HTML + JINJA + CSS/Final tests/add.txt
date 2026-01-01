@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Add Product</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: ltr;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #ededed;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px #ccc;
+        }
+
+        h1 {
+            color: #222;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 25px;
+        }
+
+        form label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #555;
+        }
+
+        form input, form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            margin-top: 25px;
+            width: 100%;
+            padding: 12px;
+            background-color: #4a4a4a; /* Dark gray button */
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Add New Product</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <label>Product Name:</label>
+            <input type="text" name="name" required/>
+
+            <label>Price:</label>
+            <input type="text" name="price" required/>
+
+            <label>Description:</label>
+            <textarea name="description" required></textarea>
+
+            <label>Product Image:</label>
+            <input type="file" name="image" required/>
+
+            <button type="submit" class="btn-submit">Add Product</button>
+        </form>
+    </div>
+</body>
+</html>

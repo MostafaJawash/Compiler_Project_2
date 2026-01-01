@@ -156,7 +156,7 @@ if_stmt
     :  IF expr_logic COLON suite (ELIF expr_logic COLON suite)* (ELSE COLON suite)?
     ;
 for_stmt
-    : FOR IDENTIFIER (DOT IDENTIFIER)* IN (IDENTIFIER (DOT IDENTIFIER)* | STRING | call_stmt) COLON suite
+    : FOR IDENTIFIER (DOT IDENTIFIER)* (COMMA IDENTIFIER (DOT IDENTIFIER)*)* IN (IDENTIFIER (DOT IDENTIFIER)* | STRING | call_stmt | array) COLON suite
     ;
 while_stmt
     : WHILE expr_logic COLON suite
