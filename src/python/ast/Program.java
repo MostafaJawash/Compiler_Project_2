@@ -11,7 +11,6 @@ public class Program extends ASTNode {
     }
 
     public void addChild(Statement child) {
-       // if (child != null)
         this.children.add(child);
     }
 

@@ -16,14 +16,12 @@ public class FunctionNode extends BaseAstNode {
     public String prettyPrint(int indent) {
         String pad = indent(indent);
         StringBuilder sb = new StringBuilder();
-
         sb.append(pad).append("FunctionCall [line=").append(line).append("]: ").append(functionName).append("\n");
-
         if (!arguments.isEmpty()) {
             sb.append(pad).append("  Parameters:\n");
             for (Node arg : arguments) {
                 if (arg != null)
-                    sb.append(arg.prettyPrint(indent + 4));
+                    sb.append(arg.prettyPrint(indent + 1));
                 else
                     sb.append(pad).append("    <null argument>\n");
             }

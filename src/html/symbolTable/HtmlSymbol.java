@@ -12,5 +12,6 @@ public class HtmlSymbol {
         this.type = type;
         this.value = value;
         this.line = line;
-    }}
+    }
+}
 

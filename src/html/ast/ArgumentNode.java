@@ -9,17 +9,15 @@ public class ArgumentNode extends BaseAstNode {
         this.argName = argName;
         this.value = value;
     }
+
     @Override
     public String prettyPrint(int indent) {
         String pad = indent(indent);
         StringBuilder sb = new StringBuilder();
-
-        sb.append(pad).append("ArgumentNode\n");
-
+        sb.append(pad).append("ArgumentNode [line=").append(line).append("]\n");
         if (argName != null && !argName.isEmpty()) {
             sb.append(pad).append("  name: ").append(argName).append("\n");
         }
-
         if (value != null) {
             sb.append(pad).append("  value: ");
             if (value instanceof TextNode textNode) {
@@ -30,8 +28,6 @@ public class ArgumentNode extends BaseAstNode {
         } else {
             sb.append(pad).append("  value: null\n");
         }
-
         return sb.toString();
     }
-
 }

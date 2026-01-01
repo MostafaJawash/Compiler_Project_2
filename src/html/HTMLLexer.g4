@@ -106,6 +106,4 @@ CLOSE_STYLE: '</style>' -> popMode;
 String       : '"' .*? '"' | '\'' .*? '\'';
 Whitespace   : [ \t\r\n\f]+ -> skip;
 Comment      : '/*' .*? '*/' -> skip;
-HexColor
-    : '#' HexDigit HexDigit HexDigit (HexDigit HexDigit HexDigit)?
-    ;
+HexColor     : '#' HexDigit HexDigit HexDigit (HexDigit HexDigit HexDigit)?;

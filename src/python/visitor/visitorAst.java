@@ -1,4 +1,5 @@
 package python.visitor;
+
 import python.generated.pythonParser;
 import python.generated.pythonParserBaseVisitor;
 import python.ast.ASTNode;
@@ -14,11 +15,12 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import python.symbolTable.SymbolTable;
 import python.symbolTable.Symbol;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class visitorAst extends pythonParserBaseVisitor {
-    public SymbolTable symbolTable = new SymbolTable(null); // إنشاء الجدول العام
+    public SymbolTable symbolTable = new SymbolTable(null);
 
     @Override
     public Program visitFile_input(pythonParser.File_inputContext ctx) {
@@ -114,16 +116,13 @@ public class visitorAst extends pythonParserBaseVisitor {
     @Override
     public ASTNode visitAssignment_multiple(pythonParser.Assignment_multipleContext ctx) {
         int line = ctx.getStart().getLine();
+        ArrayList<IdentifierNode> targets = new ArrayList<>();
         for (pythonParser.TargetContext t : ctx.target()) {
             String varName = t.getText();
             symbolTable.insert(varName, "Variable", line);
-        }
-        ArrayList<IdentifierNode> targets = new ArrayList<>();
-        for (pythonParser.TargetContext t : ctx.target()) {
             targets.add((IdentifierNode) visit(t));
         }
         Expr value = (Expr) visit(ctx.value_stmt());
-
         return new AssignmentNode(line, targets, AssignmentNode.Operator.ASSIGN, value);
     }
 
@@ -485,9 +484,8 @@ public class visitorAst extends pythonParserBaseVisitor {
         i++;
         for (; i < ctx.getChildCount(); i++) {
             String text = ctx.getChild(i).getText();
-
-            if (text.equals(".")) continue;
-
+            if (text.equals("."))
+                continue;
             if (text.equals(",")) {
                 if (!currentParts.isEmpty()) {
                     modules.add(buildIdentifierNode(line, currentParts));
@@ -562,9 +560,7 @@ public class visitorAst extends pythonParserBaseVisitor {
         ArrayList<Pair<Expr, Expr>> arg = null;
         if (ctx.arguments() != null)
             arg = (ArrayList<Pair<Expr, Expr>>) visit(ctx.arguments());
-
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
-
         return new FunDefNode(line, name, arg, body);
     }
 
@@ -705,8 +701,7 @@ public class visitorAst extends pythonParserBaseVisitor {
                             new FieldAccess(line, ctx.getChild(i).getText())
                     );
                 }
-            }
-            else if (text.equals(",")) {
+            } else if (text.equals(",")) {
                 vars.add(current);
                 current = null;
             }

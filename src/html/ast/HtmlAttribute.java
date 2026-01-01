@@ -13,16 +13,20 @@ public class HtmlAttribute extends BaseAstNode {
     @Override
     public String prettyPrint(int indent) {
         String pad = indent(indent);
-        String valStr = "";
-
+        StringBuilder sb = new StringBuilder();
+        sb.append(pad).append("HtmlAttribute [line=").append(line).append("] {\n");
+        sb.append(pad).append("  name: ").append(name).append("\n");
+        sb.append(pad).append("  value:\n");
         if (value != null) {
-            valStr = value.prettyPrint(0).trim();
+            String[] lines = value.prettyPrint(indent + 2).split("\n");
+            for (String line : lines) {
+                sb.append(line).append("\n");
+            }
         } else {
-            valStr = "<null>";
+            sb.append(pad).append("    <null>\n");
         }
-
-        return pad + "HtmlAttribute [line=" + line + "] { name: " + name +
-                ", value: " + valStr + " }\n";
+        sb.append(pad).append("}\n");
+        return sb.toString();
     }
 }
 

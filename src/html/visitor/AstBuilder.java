@@ -3,6 +3,7 @@ package html.visitor;
 import html.ast.*;
 import html.generated.HTMLParser;
 import html.generated.HTMLParserBaseVisitor;
+import html.symbolTable.HtmlSymbolTable;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public HtmlSymbolTable htmlST = new HtmlSymbolTable();
+
     @Override
     public Node visitHtmlDocument(HTMLParser.HtmlDocumentContext ctx) {
         List<Node> body = new ArrayList<>();
@@ -27,10 +29,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         if (ctx.styleElement() != null) return visit(ctx.styleElement());
 
         String tagName = ctx.TAG_NAME(0).getText();
-        List<HtmlAttribute> attributes = ctx.htmlAttribute().stream()
-                .map(a -> (HtmlAttribute) visit(a))
-                .collect(Collectors.toList());
-
+        List<HtmlAttribute> attributes = ctx.htmlAttribute().stream().map(a -> (HtmlAttribute) visit(a)).collect(Collectors.toList());
         List<Node> children = new ArrayList<>();
         if (ctx.htmlContent() != null) {
             for (int i = 0; i < ctx.htmlContent().getChildCount(); i++) {
@@ -38,23 +37,15 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 if (child != null) children.add(child);
             }
         }
-
-        ArrayList attributes=new ArrayList();
-        for(int i=0;i<ctx.htmlAttribute().size();i++){
-            attributes.add(visit(ctx.htmlAttribute(i)));
-        }
         return new HtmlElement(tagName, attributes, children, ctx.getStart().getLine());
-
     }
 
     @Override
     public Node visitHtmlAttribute(HTMLParser.HtmlAttributeContext ctx) {
         String name = ctx.TAG_NAME() != null ? ctx.TAG_NAME().getText() : "";
         Node valueNode = null;
-
         if (ctx.attrValue() != null) {
             var attrCtx = ctx.attrValue();
-
             if (attrCtx instanceof HTMLParser.DqJINJAContext || attrCtx instanceof HTMLParser.SqJINJAContext) {
                 List<Node> children = new ArrayList<>();
                 for (int i = 1; i < attrCtx.getChildCount() - 1; i++) {
@@ -62,8 +53,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                     if (child != null) children.add(child);
                 }
                 if (!children.isEmpty()) {
-                    valueNode = children.size() == 1 ? children.get(0)
-                            : new ConcatNode(children, ctx.getStart().getLine());
+                    valueNode = children.size() == 1 ? children.get(0) : new ConcatNode(children, ctx.getStart().getLine());
                 }
             } else {
                 valueNode = visit(attrCtx);
@@ -75,7 +65,6 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         } else {
             valueNode = new TextNode("true", ctx.getStart().getLine());
         }
-
         return new HtmlAttribute(name, valueNode, ctx.getStart().getLine());
     }
 
@@ -119,56 +108,42 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 }
             }
         }
-
         return new FunctionNode(functionName, arguments, ctx.getStart().getLine());
     }
-
 
 
     @Override
     public ArgumentNode visitNonAssign(HTMLParser.NonAssignContext ctx) {
         Node value = null;
-
         if (ctx.getChildCount() > 0) {
             value = visit(ctx.getChild(0));
         }
-
         if (value == null) {
             value = new TextNode(ctx.getText().replaceAll("^['\"]|['\"]$", ""), ctx.getStart().getLine());
         }
-
         return new ArgumentNode(null, value, ctx.getStart().getLine());
     }
-
-
 
 
     @Override
     public ArgumentNode visitAssign(HTMLParser.AssignContext ctx) {
         Node value = null;
-
         if (ctx.valueFun() != null) {
             value = visit(ctx.valueFun());
         } else if (ctx.getChildCount() > 2) {
             value = visit(ctx.getChild(2));
         }
-
         if (value == null) {
             value = new TextNode(ctx.getChildCount() > 2 ? ctx.getChild(2).getText() : "", ctx.getStart().getLine());
         }
-
-        String fullName = ctx.IDENTIFIER().stream()
-                .map(TerminalNode::getText)
-                .collect(Collectors.joining("."));
-
+        String fullName = ctx.IDENTIFIER().stream().map(TerminalNode::getText).collect(Collectors.joining("."));
         return new ArgumentNode(fullName, value, ctx.getStart().getLine());
     }
 
 
-
     private Node buildIdentifier(List<TerminalNode> ids, int line) {
-        if (ids == null || ids.isEmpty()) return new TextNode("", line);
-
+        if (ids == null || ids.isEmpty())
+            return new TextNode("", line);
         Node current = new IdentifierNode(ids.get(0).getText(), line);
         for (int i = 1; i < ids.size(); i++) {
             current = new MemberAccessNode(current, ids.get(i).getText(), line);
@@ -190,10 +165,8 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitForBlock(HTMLParser.ForBlockContext ctx) {
         int line = ctx.getStart().getLine();
         var forStmt = ctx.forStmt();
-
         List<String> variables = new ArrayList<>();
         Node iterable = null;
-
         int inIndex = -1;
         for (int i = 0; i < forStmt.getChildCount(); i++) {
             if (forStmt.getChild(i) instanceof TerminalNode node && node.getText().equalsIgnoreCase("in")) {
@@ -201,13 +174,11 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 break;
             }
         }
-
         int inTokenIndex = ((TerminalNode) forStmt.getChild(inIndex)).getSymbol().getTokenIndex();
 
         for (TerminalNode id : forStmt.IDENTIFIER()) {
             if (id.getSymbol().getTokenIndex() < inTokenIndex) variables.add(id.getText());
         }
-
         if (forStmt.funCall() != null) {
             iterable = visit(forStmt.funCall());
         } else {
@@ -216,7 +187,6 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                     .collect(Collectors.toList());
             if (!idsAfterIn.isEmpty()) iterable = buildIdentifier(idsAfterIn, line);
         }
-
         if (iterable == null) iterable = new TextNode("[]", line);
 
         List<Node> body = new ArrayList<>();
@@ -226,7 +196,6 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 if (child != null) body.add(child);
             }
         }
-
         return new JinjaForBlock(variables, iterable, body, line);
     }
 
@@ -235,20 +204,15 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitIfBlock(HTMLParser.IfBlockContext ctx) {
         int line = ctx.getStart().getLine();
         var ifStmt = ctx.ifStmt();
-
         Node condition = visit(ifStmt.getChild(2));
         if (condition == null) condition = new TextNode("true", line);
-
         List<Node> body = new ArrayList<>();
         if (ifStmt.htmlContent() != null) {
             for (int i = 0; i < ifStmt.htmlContent().getChildCount(); i++) {
                 Node child = visit(ifStmt.htmlContent().getChild(i));
                 if (child != null) body.add(child);
             }
-
-
         }
-
         List<Node> elseBody = new ArrayList<>();
         if (ifStmt.elseStm() != null && ifStmt.elseStm().htmlContent() != null) {
             for (int i = 0; i < ifStmt.elseStm().htmlContent().getChildCount(); i++) {
@@ -256,17 +220,13 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 if (child != null) elseBody.add(child);
             }
         }
-
         return new JinjaIfBlock(condition, body, elseBody, line);
     }
 
 
     @Override
     public Node visitStyleElement(HTMLParser.StyleElementContext ctx) {
-        return new StyleElement(
-                ctx.stylesheet() != null ? (Stylesheet) visit(ctx.stylesheet()) : new Stylesheet(List.of(), ctx.getStart().getLine()),
-                ctx.getStart().getLine()
-        );
+        return new StyleElement(ctx.stylesheet() != null ? (Stylesheet) visit(ctx.stylesheet()) : new Stylesheet(List.of(), ctx.getStart().getLine()), ctx.getStart().getLine());
     }
 
     @Override
@@ -292,11 +252,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
     @Override
     public Node visitDeclaration(HTMLParser.DeclarationContext ctx) {
-        return new CssDeclaration(
-                ctx.property().getText(),
-                ctx.value().getText(),
-                ctx.getStart().getLine()
-        );
+        return new CssDeclaration(ctx.property().getText(), ctx.value().getText(), ctx.getStart().getLine());
     }
 
 

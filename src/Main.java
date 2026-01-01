@@ -1,5 +1,6 @@
 import python.ast.Program;
 import python.symbolTable.Symbol;
+import python.symbolTable.SymbolTable;
 import python.visitor.visitorAst;
 import python.generated.pythonLexer;
 import python.generated.pythonParser;
@@ -11,7 +12,7 @@ import html.generated.HTMLParser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import python.symbolTable.SymbolTable;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -23,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-
-
     static class NodeData {
         String label;
         ParseTree tree;
@@ -40,9 +39,7 @@ public class Main {
         }
     }
 
-
     public static void main(String[] args) throws IOException {
-
         String sourcePython = "Tests/PYTHON/Final tests/app.txt";
         String pythonCode = Files.readString(Path.of(sourcePython));
         CharStream pyInput = CharStreams.fromString(pythonCode);
@@ -52,12 +49,14 @@ public class Main {
         ParseTree pyTree = pyParser.file_input();
         visitorAst pyVisitor = new visitorAst();
         Program pyAst = (Program) pyVisitor.visit(pyTree);
-        System.out.println("=== AST Python ===");
+        System.out.println("AST Python (Flask):");
         System.out.println(pyAst);
-        System.out.println("=================");
-        System.out.println("=== Parse Tree Python ===");
+        System.out.println("------------------------------------------------------------");
+        System.out.println("Parse Tree Python:");
         System.out.println(pyTree.toStringTree(pyParser));
-        System.out.println("=================");
+        System.out.println("------------------------------------------------------------");
+
+        System.out.println();
 
         String sourceHtml = "Tests/HTML + JINJA + CSS/Final tests/index.txt";
         String htmlCode = Files.readString(Path.of(sourceHtml));
@@ -68,76 +67,68 @@ public class Main {
         ParseTree htmlTree = htmlParser.htmlDocument();
         AstBuilder htmlVisitor = new AstBuilder();
         Node htmlAst = htmlVisitor.visit(htmlTree);
-
-        System.out.println("=========================");
-        System.out.println("=== AST HTML ===");
+        System.out.println("AST HTML (CSS+JINJA):");
         if (htmlAst != null) {
             System.out.println(htmlAst.prettyPrint(0));
         }
-        System.out.println("================");
-        System.out.println("=== Parse Tree HTML ===");
+        System.out.println("------------------------------------------------------------");
+        System.out.println("Parse Tree HTML:");
         System.out.println(htmlTree.toStringTree(htmlParser));
-        System.out.println("================");
+        System.out.println("------------------------------------------------------------");
 
-        pyVisitor.symbolTable.printTable();
-        Symbol symbol=pyVisitor.symbolTable.lookup("cnt");
-        if(symbol==null)
-            System.out.println("NULL");
-        else
-            System.out.println(symbol.line);
         System.out.println();
-        System.out.println("=== HTML Symbol Table ===");
-        htmlVisitor.htmlST.printTable();
-        /* -------- GUI -------- */
-        showParseTree(pythonCode, pyTree, pyParser);
-        showParseTree(htmlCode, htmlTree, htmlParser);
-    }
 
+        System.out.println("Symbol table python (Flask):");
+        pyVisitor.symbolTable.printTable();
+        System.out.println("------------------------------------------------------------");
+        System.out.println("Symbol table HTML:");
+        //call print here
+        System.out.println("------------------------------------------------------------");
+        System.out.println("THE END");
+
+        //this to check from parse tree for python because we used custom logic
+        showParseTree(pythonCode, pyTree, pyParser);
+
+        //we do not need this, we can test parse tree for html in antlr preview
+        //showParseTree(htmlCode, htmlTree, htmlParser);
+    }
 
     private static void showParseTree(String code, ParseTree parseTree, Parser parser) {
         JFrame frame = new JFrame("ANTLR Parse Tree Viewer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1200, 750);
-
         JTextArea codeArea = new JTextArea(code);
         codeArea.setFont(new Font("Consolas", Font.PLAIN, 14));
         codeArea.setEditable(false);
-
         JScrollPane codeScroll = new JScrollPane(codeArea);
         JTree tree = new JTree(new DefaultTreeModel(buildNode(parseTree, parser)));
         expandAll(tree);
-
         JScrollPane treeScroll = new JScrollPane(tree);
-
         tree.addTreeSelectionListener(e -> {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            if (node == null) return;
-
+            if (node == null)
+                return;
             Object obj = node.getUserObject();
-            if (!(obj instanceof NodeData data)) return;
-
+            if (!(obj instanceof NodeData data))
+                return;
             List<Token> tokens = new ArrayList<>();
             collectTokens(data.tree, tokens);
-            if (tokens.isEmpty()) return;
-
+            if (tokens.isEmpty())
+                return;
             int start = tokens.get(0).getStartIndex();
             int stop = tokens.get(tokens.size() - 1).getStopIndex() + 1;
-
             int len = codeArea.getDocument().getLength();
             start = Math.min(start, len);
             stop = Math.min(stop, len);
-
             codeArea.requestFocus();
             codeArea.setCaretPosition(start);
             codeArea.moveCaretPosition(stop);
         });
-
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
         split.setDividerLocation(450);
         frame.add(split);
         frame.setVisible(true);
     }
-
 
     private static DefaultMutableTreeNode buildNode(ParseTree tree, Parser parser) {
         String label;
@@ -146,9 +137,7 @@ public class Main {
         } else {
             label = tree.getText();
         }
-
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(new NodeData(label, tree));
-
         for (int i = 0; i < tree.getChildCount(); i++) {
             node.add(buildNode(tree.getChild(i), parser));
         }
