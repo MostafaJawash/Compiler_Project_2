@@ -138,12 +138,12 @@ ADD: '+';
 MINUS: '-';
 MOD: '%';
 POWER: '**';
-LESS_THAN: '<';
-GREATER_THAN: '>';
-EQUALS: '==';
 GT_EQ: '>=';
 LT_EQ: '<=';
 NOT_EQ_1: '<>';
+LESS_THAN: '<';
+GREATER_THAN: '>';
+EQUALS: '==';
 NOT_EQ_2: '!=';
 ASSIGN : '=' ;
 

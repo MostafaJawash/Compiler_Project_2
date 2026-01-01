@@ -1,5 +1,4 @@
 package python.visitor;
-
 import python.generated.pythonParser;
 import python.generated.pythonParserBaseVisitor;
 import python.ast.ASTNode;
@@ -13,11 +12,13 @@ import python.ast.SimpleStmt.*;
 import python.ast.Statement;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-
+import python.symbolTable.SymbolTable;
+import python.symbolTable.Symbol;
 import java.util.ArrayList;
 import java.util.List;
 
 public class visitorAst extends pythonParserBaseVisitor {
+    public SymbolTable symbolTable = new SymbolTable(null); // إنشاء الجدول العام
 
     @Override
     public Program visitFile_input(pythonParser.File_inputContext ctx) {
@@ -113,11 +114,16 @@ public class visitorAst extends pythonParserBaseVisitor {
     @Override
     public ASTNode visitAssignment_multiple(pythonParser.Assignment_multipleContext ctx) {
         int line = ctx.getStart().getLine();
+        for (pythonParser.TargetContext t : ctx.target()) {
+            String varName = t.getText();
+            symbolTable.insert(varName, "Variable", line);
+        }
         ArrayList<IdentifierNode> targets = new ArrayList<>();
         for (pythonParser.TargetContext t : ctx.target()) {
             targets.add((IdentifierNode) visit(t));
         }
         Expr value = (Expr) visit(ctx.value_stmt());
+
         return new AssignmentNode(line, targets, AssignmentNode.Operator.ASSIGN, value);
     }
 
@@ -547,15 +553,19 @@ public class visitorAst extends pythonParserBaseVisitor {
         return new ImportNode(fromModule, namesWithAliases, line);
     }
 
-
     @Override
     public ASTNode visitFun_def(pythonParser.Fun_defContext ctx) {
-        IdentifierNode name = new IdentifierNode(ctx.getStart().getLine(), ctx.IDENTIFIER().getText());
+        int line = ctx.getStart().getLine();
+        String funcName = ctx.IDENTIFIER().getText();
+        symbolTable.insert(funcName, "Function", line);
+        IdentifierNode name = new IdentifierNode(line, funcName);
         ArrayList<Pair<Expr, Expr>> arg = null;
         if (ctx.arguments() != null)
             arg = (ArrayList<Pair<Expr, Expr>>) visit(ctx.arguments());
+
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
-        return new FunDefNode(ctx.getStart().getLine(), name, arg, body);
+
+        return new FunDefNode(line, name, arg, body);
     }
 
     @Override
@@ -680,29 +690,65 @@ public class visitorAst extends pythonParserBaseVisitor {
 
     @Override
     public ASTNode visitFor_stmt(pythonParser.For_stmtContext ctx) {
-
         int line = ctx.getStart().getLine();
-        IdentifierNode var = new IdentifierNode(line, ctx.IDENTIFIER(0).getText());
-        int idx = 1;
-        while (idx < ctx.IDENTIFIER().size() && ctx.getChild(idx * 2).getText().equals(".")) {
-            var.addParts(new FieldAccess(line, ctx.IDENTIFIER(idx).getText()));
-            idx++;
+        ArrayList<IdentifierNode> vars = new ArrayList<>();
+        IdentifierNode current = null;
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            String text = ctx.getChild(i).getText();
+            if (text.equals("in"))
+                break;
+            if (ctx.getChild(i) instanceof TerminalNode && ((TerminalNode) ctx.getChild(i)).getSymbol().getType() == pythonParser.IDENTIFIER) {
+                if (current == null) {
+                    current = new IdentifierNode(line, ctx.getChild(i).getText());
+                } else {
+                    current.addParts(
+                            new FieldAccess(line, ctx.getChild(i).getText())
+                    );
+                }
+            }
+            else if (text.equals(",")) {
+                vars.add(current);
+                current = null;
+            }
         }
+        if (current != null)
+            vars.add(current);
         Expr inExpr;
         if (ctx.STRING() != null) {
             inExpr = new Atom(ctx.STRING().getSymbol().getLine(), "string", ctx.STRING().getText());
         } else if (ctx.call_stmt() != null) {
             inExpr = (Expr) visit(ctx.call_stmt());
+        } else if (ctx.array() != null) {
+            inExpr = (Expr) visit(ctx.array());
         } else {
-            int baseIndex = idx;
-            IdentifierNode inIdentifier = new IdentifierNode(line, ctx.IDENTIFIER(baseIndex).getText());
-            for (int i = baseIndex + 1; i < ctx.IDENTIFIER().size(); i++) {
-                inIdentifier.addParts(new FieldAccess(line, ctx.IDENTIFIER(i).getText()));
+            int inIndex = -1;
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                if (ctx.getChild(i).getText().equals("in")) {
+                    inIndex = i + 1;
+                    break;
+                }
             }
-            inExpr = inIdentifier;
+            if (inIndex >= 0 && inIndex < ctx.getChildCount()) {
+                TerminalNode rootNode = (TerminalNode) ctx.getChild(inIndex);
+                IdentifierNode inId = new IdentifierNode(line, rootNode.getText());
+                for (int i = inIndex + 1; i < ctx.getChildCount(); i++) {
+                    String t = ctx.getChild(i).getText();
+                    if (t.equals(":"))
+                        break;
+                    if (t.equals(".")) {
+                        i++;
+                        if (i < ctx.getChildCount()) {
+                            inId.addParts(new FieldAccess(line, ctx.getChild(i).getText()));
+                        }
+                    }
+                }
+                inExpr = inId;
+            } else {
+                inExpr = null;
+            }
         }
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
-        return new ForStmtNode(line, var, inExpr, body);
+        return new ForStmtNode(line, vars, inExpr, body);
     }
 
     @Override

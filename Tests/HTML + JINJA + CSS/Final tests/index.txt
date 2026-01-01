@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Product List</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: ltr;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #ededed;
+        }
+
+        header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        /* Add Product Button */
+        .btn-add {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 25px;
+            background-color: #4a4a4a; /* Dark gray */
+            color: #fff;
+            font-weight: 600;
+            border-radius: 6px;
+            text-decoration: none;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        /* Banner Image */
+        header img {
+            width: 100%;
+            height: 570px;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            border-radius: 12px;
+        }
+
+        /* Header Title */
+        header h1 {
+            margin-top: 30px;
+            font-size: 38px;
+            color: #222;
+            font-weight: 700;
+        }
+
+        /* Intro Text */
+        .intro {
+            text-align: center;
+            font-size: 22px;
+            margin-top: 25px;
+            margin-bottom: 30px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        a { text-decoration: none; }
+
+        /* Buttons inside product cards */
+        .btn-detail, .btn-delete {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-detail {
+            background-color: #e91e63; /* Pink button */
+            color: #fff;
+        }
+
+        .btn-delete {
+            background-color: #000; /* Black button */
+            color: #fff;
+        }
+
+        /* Products Layout */
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .product-card {
+            background-color: #fff;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px #ccc;
+            padding: 22px;
+            width: 280px;
+            text-align: center;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .product-card h3 {
+            margin: 10px 0 5px 0;
+            font-size: 20px;
+            color: #222;
+            font-weight: 600;
+        }
+
+        .product-card .price {
+            font-weight: 700;
+            font-size: 26px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .product-card .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+            background-color: #d9d9d9;
+            color: #222;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px #ccc;
+        }
+
+        footer p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a class="btn-add" href="{{ url_for('add_product') }}">Add New Product</a>
+    <img src="static/images/headerImg.jpg" alt="Banner Image"/>
+    <h1>Product List</h1>
+</header>
+
+<div class="intro">
+    Welcome to our store! Browse the latest products and choose what you like.
+</div>
+<div class="products">
+    {% for product in products %}
+    <div class="product-card">
+        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+        <h3>{{ product.name }}</h3>
+        <p class="price">{{ product.price }}</p>
+        <div class="actions">
+            <a class="btn-detail" href="{{ url_for('product_detail', id=product.id) }}">Details</a>
+            <a class="btn-delete" href="{{ url_for('delete_product', id=product.id) }}">Delete</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<footer>
+    All rights reserved &copy; 2025 Product Store
+    <p>End of page</p>
+    <p>Contact info: productsHR@gmail.com</p>
+</footer>
+
+</body>
+</html>

@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
+public class AstBuilder extends HTMLParserBaseVisitor<Node> {
+    public HtmlSymbolTable htmlST = new HtmlSymbolTable();
     @Override
     public Node visitHtmlDocument(HTMLParser.HtmlDocumentContext ctx) {
         List<Node> body = new ArrayList<>();
@@ -38,7 +39,12 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
             }
         }
 
+        ArrayList attributes=new ArrayList();
+        for(int i=0;i<ctx.htmlAttribute().size();i++){
+            attributes.add(visit(ctx.htmlAttribute(i)));
+        }
         return new HtmlElement(tagName, attributes, children, ctx.getStart().getLine());
+
     }
 
     @Override
@@ -75,6 +81,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
 
     @Override
+
     public Node visitVariable(HTMLParser.VariableContext ctx) {
         Node expression = ctx.getChildCount() >= 3 ? visit(ctx.getChild(1)) : new TextNode("", ctx.getStart().getLine());
         return new JinjaExpressionNode(expression, ctx.getStart().getLine());
@@ -224,6 +231,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     }
 
     @Override
+
     public Node visitIfBlock(HTMLParser.IfBlockContext ctx) {
         int line = ctx.getStart().getLine();
         var ifStmt = ctx.ifStmt();
@@ -237,6 +245,8 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 Node child = visit(ifStmt.htmlContent().getChild(i));
                 if (child != null) body.add(child);
             }
+
+
         }
 
         List<Node> elseBody = new ArrayList<>();
@@ -331,6 +341,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     }
 
     @Override
+
     public Node visitNotExpr(HTMLParser.NotExprContext ctx) {
         return new LogicNode(visit(ctx.getChild(1)), null, ctx.getStart().getLine());
     }

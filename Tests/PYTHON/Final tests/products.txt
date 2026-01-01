@@ -1,0 +1,52 @@
+products = [
+    {
+        "id": 1,
+        "name": "SoundForce X1000",
+        "price": "$ 85",
+        "description": "The SoundForce X1000 is a powerful large-size speaker designed to deliver rich, deep, and clear sound for music playback. It is ideal for homes, events, shops, and gatherings where strong audio performance is needed. The speaker produces balanced bass and clear highs, making it suitable for all music styles. Built with durable materials, it offers reliable performance and long-term use.",
+        "image": "images/product1.png"
+    },
+    {
+        "id": 2,
+        "name": "TimeSync Pro Smart Watch",
+        "price": "$ 55",
+        "description": "The TimeSync Pro Smart Watch combines modern technology with a sleek and comfortable design. It provides accurate timekeeping, activity tracking, and smart notifications to support daily life. The clear digital display and long battery life make it ideal for everyday use, work, and light sports activities.",
+        "image": "images/product2.png"
+    },
+    {
+        "id": 3,
+        "name": "FryMaster Electric Cooker",
+        "price": "$ 140",
+        "description": "The FryMaster Electric Cooker is designed to fry French fries quickly and evenly. It ensures consistent heat distribution for crispy and delicious results. Easy to operate and safe to use, this machine is suitable for home kitchens, food trucks, and small restaurants. Its durable construction ensures efficient and long-lasting performance.",
+        "image": "images/product3.png"
+    },
+    {
+        "id": 4,
+        "name": "PureFlow Water Dispenser",
+        "price": "$ 165",
+        "description": "PureFlow Water Dispenser provides clean and refreshing drinking water at the desired temperature. It is designed for daily use in homes, offices, and commercial spaces. The unit is easy to use, energy-efficient, and built from high-quality materials to ensure safe and reliable water dispensing.",
+        "image": "images/product4.png"
+    },
+     {
+        "id": 5,
+        "name": "ViewCast Media Box",
+        "price": "$ 65",
+        "description": "The ViewCast Media Box allows you to enjoy videos, movies, and digital content directly on your TV screen. It comes with a remote control for easy navigation and smooth user experience. The device offers stable performance and high-quality video output, making it ideal for entertainment and media streaming",
+        "image": "images/product5.png"
+    },
+    {
+        "id": 6,
+        "name": "ClearShot Zoom Camera",
+        "price": "$ 195",
+        "description": "The ClearShot Zoom Camera is designed to capture sharp photos and clear videos with excellent detail. It features user-friendly controls and multiple shooting modes, making it suitable for beginners and everyday users. Compact and lightweight, it is perfect for travel, events, and personal photography.",
+        "image": "images/product6.png"
+    },
+    {
+        "id": 7,
+        "name": "OfficePrint Smart Printer",
+        "price": "$ 110",
+        "description": "The OfficePrint Smart Printer delivers high-quality printing for documents and images. It is designed for home offices, small businesses, and personal use. The printer offers reliable performance, easy installation, and efficient operation for daily printing needs.",
+        "image": "images/product7.png"
+    }
+]
+
