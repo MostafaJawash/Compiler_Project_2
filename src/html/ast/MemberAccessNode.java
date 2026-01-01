@@ -1,29 +1,22 @@
 package html.ast;
 
 public class MemberAccessNode extends BaseAstNode {
-    private final Node base;
-    private final String property;
+    private final Node target;
+    private final String field;
 
-    public MemberAccessNode(Node base, String property, int line) {
+    public MemberAccessNode(Node target, String field, int line) {
         super(line);
-        this.base = base;
-        this.property = property;
+        this.target = target;
+        this.field = field;
     }
 
     @Override
-    public String prettyPrint(int indent) {
-        String pad = indent(indent);
+    public String prettyPrint(int level) {
         StringBuilder sb = new StringBuilder();
-
-        sb.append(pad).append("MemberAccess\n");
-
-        if (base != null)
-            sb.append(base.prettyPrint(indent + 4));
-        else
-            sb.append(pad).append("    <null base>\n");
-
-        sb.append(pad).append("  property: ").append(property).append("\n");
+        sb.append(indent(level)).append("MemberAccess (field: ").append(field).append(")\n");
+        if (target != null) {
+            sb.append(target.prettyPrint(level + 1));
+        }
         return sb.toString();
     }
-
 }
