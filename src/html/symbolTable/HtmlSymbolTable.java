@@ -36,6 +36,7 @@ public class HtmlSymbolTable {
     public void addSymbol(String name, String type, String value, int line) {
         currentScope.symbols.add(new HtmlSymbol(name, type, value, line));
     }
+
     public void printTable() {
         System.out.println("\n" + "=".repeat(85));
         System.out.println("HTML / CSS / JINJA2 SYMBOL TABLE REPORT");

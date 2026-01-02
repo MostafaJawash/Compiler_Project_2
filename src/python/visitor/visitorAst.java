@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class visitorAst extends pythonParserBaseVisitor {
-    public SymbolTable symbolTable = new SymbolTable(null );
+    public SymbolTable symbolTable = new SymbolTable(null);
 
     @Override
     public Program visitFile_input(pythonParser.File_inputContext ctx) {
@@ -726,19 +726,25 @@ public class visitorAst extends pythonParserBaseVisitor {
         } else {
             int inIndex = -1;
             for (int i = 0; i < ctx.getChildCount(); i++) {
-                if (ctx.getChild(i).getText().equals("in")) { inIndex = i + 1; break; }
+                if (ctx.getChild(i).getText().equals("in")) {
+                    inIndex = i + 1;
+                    break;
+                }
             }
             if (inIndex >= 0 && inIndex < ctx.getChildCount()) {
                 IdentifierNode inId = new IdentifierNode(line, ctx.getChild(inIndex).getText());
 
                 inExpr = inId;
-            } else { inExpr = null; }
+            } else {
+                inExpr = null;
+            }
         }
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
         symbolTable = symbolTable.getParent();
 
         return new ForStmtNode(line, vars, inExpr, body);
     }
+
     @Override
     public ASTNode visitWhile_stmt(pythonParser.While_stmtContext ctx) {
         Expr condition = (Expr) visit(ctx.expr_logic());

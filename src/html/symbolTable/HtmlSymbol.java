@@ -8,7 +8,6 @@ public class HtmlSymbol {
     public int line;
 
 
-
     public HtmlSymbol(String name, String type, String value, int line) {
         this.name = name;
         this.type = type;

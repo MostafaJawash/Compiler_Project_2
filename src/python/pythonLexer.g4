@@ -181,7 +181,7 @@ fragment LONG_STRING_ITEM: ~'\\' | '\\' (RN | .);
 fragment RN: '\r'? '\n';
 NUMBER: [1-9] [0-9]* | '0';
 FLOAT_NUMBER: EXPONENT_OR_POINT_FLOAT;
-fragment EXPONENT_OR_POINT_FLOAT: ([0-9]+ | POINT_FLOAT) [eE] [+-]? [0-9]+ | POINT_FLOAT;
+fragment EXPONENT_OR_POINT_FLOAT: ([0-9]+ | POINT_FLOAT) [eE] [+-]? ([0-9]+ | POINT_FLOAT);
 fragment POINT_FLOAT: [0-9]* '.' [0-9]+ | [0-9]+ '.';
 SPACES : [ \t]+ -> skip ;
 COMMENT: '#' ~[\r\n\f]* -> skip;

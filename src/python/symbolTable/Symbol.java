@@ -11,4 +11,5 @@ public class Symbol {
         this.type = type;
         this.line = line;
 
-    }}
+    }
+}
