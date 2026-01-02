@@ -15,7 +15,7 @@ public class SymbolTable {
         if (!symbols.containsKey(name)) {
             symbols.put(name, new Symbol(name, type, line));
         } else {
-            //System.out.println("Error: Symbol '" + name + "' is already defined. First occurrence at line: " + line);
+            System.err.println("Error: " + name + " already defined in this scope.");
         }
     }
 
@@ -26,10 +26,15 @@ public class SymbolTable {
     }
 
     public void printTable() {
-        System.out.println("\n--- Symbol Table Content ---");
-        for (Symbol s : symbols.values()) {
-            System.out.println("Node: " + s.name + " | Type: " + s.type + " | Line: " + s.line);
+        System.out.println("\n--- Symbol Table ---");
+        if (symbols.isEmpty()) {
+            System.out.println("(Empty Scope)");
+        } else {
+            for (Symbol s : symbols.values()) {
+                System.out.println("Node: " + s.name + " | Type: " + s.type + " | Line: " + s.line);
+            }
         }
+
         if (parent != null) {
             System.out.println(">>> Linked to Parent Scope:");
             parent.printTable();
