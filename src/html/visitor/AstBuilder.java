@@ -305,6 +305,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 ctx.getStart().getLine()
         );
     }
+
     @Override
     public Node visitIdMath(HTMLParser.IdMathContext ctx) {
         return new IdentifierNode(

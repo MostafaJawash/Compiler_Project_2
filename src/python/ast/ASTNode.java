@@ -18,7 +18,7 @@ public abstract class ASTNode {
         return name;
     }
 
-    protected String indent(int level) {
+    public String indent(int level) {
         return "  ".repeat(level);
     }
 
