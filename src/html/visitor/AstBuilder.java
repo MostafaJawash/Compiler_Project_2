@@ -84,8 +84,9 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     @Override
     public Node visitNumberEXPR(HTMLParser.NumberEXPRContext ctx) {
         int value = Integer.parseInt(ctx.NUMBER().getText());
-        return new NumberNode(value);
+        return new NumberNode(value, ctx.getStart().getLine());
     }
+
 
     @Override
     public Node visitStringEXPR(HTMLParser.StringEXPRContext ctx) {
@@ -255,36 +256,68 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         return new CssDeclaration(ctx.property().getText(), ctx.value().getText(), ctx.getStart().getLine());
     }
 
-
     @Override
     public Node visitAddOperation(HTMLParser.AddOperationContext ctx) {
-        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
+        return new ArithmeticNode(
+                visit(ctx.getChild(0)),
+                visit(ctx.getChild(2)),
+                ArithmeticNode.Operator.ADD,
+                ctx.getStart().getLine()
+        );
     }
 
     @Override
     public Node visitSubOperation(HTMLParser.SubOperationContext ctx) {
-        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
+        return new ArithmeticNode(
+                visit(ctx.getChild(0)),
+                visit(ctx.getChild(2)),
+                ArithmeticNode.Operator.SUB,
+                ctx.getStart().getLine()
+        );
     }
 
     @Override
     public Node visitMulOperation(HTMLParser.MulOperationContext ctx) {
-        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
+        return new ArithmeticNode(
+                visit(ctx.getChild(0)),
+                visit(ctx.getChild(2)),
+                ArithmeticNode.Operator.MUL,
+                ctx.getStart().getLine()
+        );
     }
 
     @Override
     public Node visitDivOperation(HTMLParser.DivOperationContext ctx) {
-        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
+        return new ArithmeticNode(
+                visit(ctx.getChild(0)),
+                visit(ctx.getChild(2)),
+                ArithmeticNode.Operator.DIV,
+                ctx.getStart().getLine()
+        );
     }
 
     @Override
     public Node visitModOperation(HTMLParser.ModOperationContext ctx) {
-        return new ArithmeticNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
+        return new ArithmeticNode(
+                visit(ctx.getChild(0)),
+                visit(ctx.getChild(2)),
+                ArithmeticNode.Operator.MOD,
+                ctx.getStart().getLine()
+        );
+    }
+    @Override
+    public Node visitIdMath(HTMLParser.IdMathContext ctx) {
+        return new IdentifierNode(
+                ctx.IDENTIFIER().getText(),
+                ctx.getStart().getLine()
+        );
     }
 
     @Override
     public Node visitBracketMathOperation(HTMLParser.BracketMathOperationContext ctx) {
         return visit(ctx.getChild(1));
     }
+
 
     @Override
     public Node visitOrExpr(HTMLParser.OrExprContext ctx) {
@@ -310,6 +343,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     @Override
     public Node visitNumberMath(HTMLParser.NumberMathContext ctx) {
         int value = Integer.parseInt(ctx.NUMBER().getText());
-        return new NumberNode(value);
+        return new NumberNode(value, ctx.getStart().getLine());
     }
+
 }
