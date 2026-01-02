@@ -36,20 +36,23 @@ public class HtmlSymbolTable {
     public void addSymbol(String name, String type, String value, int line) {
         currentScope.symbols.add(new HtmlSymbol(name, type, value, line));
     }
-
     public void printTable() {
-        System.out.println("\n" + "=".repeat(60));
-        System.out.println("HTML SYMBOL TABLE REPORT");
-        System.out.println("=".repeat(60));
-        for (Scope scope : allScopes) {
-            System.out.println("\nSCOPE: " + scope.name.toUpperCase());
-            System.out.println("-".repeat(60));
-            for (HtmlSymbol s : scope.symbols) {
+        System.out.println("\n" + "=".repeat(85));
+        System.out.println("HTML / CSS / JINJA2 SYMBOL TABLE REPORT");
+        System.out.println("=".repeat(85));
 
-                System.out.printf("| %-15s | %-12s | %-15s | L: %-3d |\n",
-                        s.name, s.type, s.value, s.line);
+        int scopeCounter = 1;
+
+        for (Scope scope : allScopes) {
+            if (!scope.symbols.isEmpty()) {
+                System.out.println("\n--- SCOPE #" + scopeCounter + " ---");
+                for (HtmlSymbol s : scope.symbols) {
+                    System.out.printf("| Symbol: %-15s | Type: %-12s | Value: %-25s | Line: %-3d |\n",
+                            s.name, s.type, s.value, s.line);
+                }
+                scopeCounter++;
             }
         }
-        System.out.println("=".repeat(60));
+        System.out.println("\n" + "=".repeat(85));
     }
 }

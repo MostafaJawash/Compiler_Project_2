@@ -29,20 +29,40 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         if (ctx.styleElement() != null) return visit(ctx.styleElement());
 
         String tagName = ctx.TAG_NAME(0).getText();
-        List<HtmlAttribute> attributes = ctx.htmlAttribute().stream().map(a -> (HtmlAttribute) visit(a)).collect(Collectors.toList());
-        List<Node> children = new ArrayList<>();
-        if (ctx.htmlContent() != null) {
-            for (int i = 0; i < ctx.htmlContent().getChildCount(); i++) {
-                Node child = visit(ctx.htmlContent().getChild(i));
-                if (child != null) children.add(child);
-            }
-        }
-        return new HtmlElement(tagName, attributes, children, ctx.getStart().getLine());
-    }
+        int line = ctx.getStart().getLine();
 
+        htmlST.addSymbol(tagName, "HTML_TAG", "Node", line);
+
+        boolean hasAttributes = ctx.htmlAttribute() != null && !ctx.htmlAttribute().isEmpty();
+        boolean hasContent = ctx.htmlContent() != null && ctx.htmlContent().getChildCount() > 0;
+
+        List<HtmlAttribute> attributes = new ArrayList<>();
+        List<Node> children = new ArrayList<>();
+
+        if (hasAttributes || hasContent) {
+            htmlST.pushScope("Tag_" + tagName);
+
+            attributes = ctx.htmlAttribute().stream()
+                    .map(a -> (HtmlAttribute) visit(a))
+                    .collect(Collectors.toList());
+
+            if (ctx.htmlContent() != null) {
+                for (int i = 0; i < ctx.htmlContent().getChildCount(); i++) {
+                    Node child = visit(ctx.htmlContent().getChild(i));
+                    if (child != null) children.add(child);
+                }
+            }
+
+            htmlST.popScope();
+        }
+        return new HtmlElement(tagName, attributes, children, line);
+    }
     @Override
     public Node visitHtmlAttribute(HTMLParser.HtmlAttributeContext ctx) {
         String name = ctx.TAG_NAME() != null ? ctx.TAG_NAME().getText() : "";
+        int line = ctx.getStart().getLine();
+        String rawValue = ctx.attrValue() != null ? ctx.attrValue().getText().replaceAll("^['\"]|['\"]$", "") : "true";
+        htmlST.addSymbol(name, "Attribute", rawValue, line);
         Node valueNode = null;
         if (ctx.attrValue() != null) {
             var attrCtx = ctx.attrValue();
@@ -161,13 +181,14 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         return null;
     }
 
-
     @Override
     public Node visitForBlock(HTMLParser.ForBlockContext ctx) {
         int line = ctx.getStart().getLine();
+        htmlST.pushScope("Jinja_For_Line" +line);
         var forStmt = ctx.forStmt();
         List<String> variables = new ArrayList<>();
         Node iterable = null;
+
         int inIndex = -1;
         for (int i = 0; i < forStmt.getChildCount(); i++) {
             if (forStmt.getChild(i) instanceof TerminalNode node && node.getText().equalsIgnoreCase("in")) {
@@ -178,8 +199,14 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         int inTokenIndex = ((TerminalNode) forStmt.getChild(inIndex)).getSymbol().getTokenIndex();
 
         for (TerminalNode id : forStmt.IDENTIFIER()) {
-            if (id.getSymbol().getTokenIndex() < inTokenIndex) variables.add(id.getText());
+            if (id.getSymbol().getTokenIndex() < inTokenIndex) {
+                String varName = id.getText();
+                variables.add(varName);
+
+                htmlST.addSymbol(varName, "Jinja_Var", "Loop_Iterator", line);
+            }
         }
+
         if (forStmt.funCall() != null) {
             iterable = visit(forStmt.funCall());
         } else {
@@ -197,6 +224,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 if (child != null) body.add(child);
             }
         }
+        htmlST.popScope();
         return new JinjaForBlock(variables, iterable, body, line);
     }
 
@@ -205,6 +233,12 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitIfBlock(HTMLParser.IfBlockContext ctx) {
         int line = ctx.getStart().getLine();
         var ifStmt = ctx.ifStmt();
+        boolean hasBody = ifStmt.htmlContent() != null && ifStmt.htmlContent().getChildCount() > 0;
+        boolean hasElse = ifStmt.elseStm() != null && ifStmt.elseStm().htmlContent() != null;
+        if (hasBody || hasElse) {
+            htmlST.pushScope("Jinja_If_Block_Line_" + line);
+            htmlST.popScope();
+        }
         Node condition = visit(ifStmt.getChild(2));
         if (condition == null) condition = new TextNode("true", line);
         List<Node> body = new ArrayList<>();
@@ -243,17 +277,26 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     @Override
     public Node visitRuleSet(HTMLParser.RuleSetContext ctx) {
         String selector = ctx.selector().getText();
+        int line = ctx.getStart().getLine();
         List<CssDeclaration> decls = new ArrayList<>();
-        for (var declCtx : ctx.declaration()) {
-            CssDeclaration decl = (CssDeclaration) visit(declCtx);
-            if (decl != null) decls.add(decl);
+        if (ctx.declaration() != null && !ctx.declaration().isEmpty()) {
+            htmlST.pushScope("CSS_" + selector);
+            for (var declCtx : ctx.declaration()) {
+                CssDeclaration decl = (CssDeclaration) visit(declCtx);
+                if (decl != null) decls.add(decl);
+            }
+            htmlST.popScope();
         }
-        return new CssRule(selector, decls, ctx.getStart().getLine());
-    }
+
+        return new CssRule(selector, decls, line);}
 
     @Override
     public Node visitDeclaration(HTMLParser.DeclarationContext ctx) {
-        return new CssDeclaration(ctx.property().getText(), ctx.value().getText(), ctx.getStart().getLine());
+        String property = ctx.property().getText();
+        String value = ctx.value().getText();
+        int line = ctx.getStart().getLine();
+        htmlST.addSymbol(property, "CSS_Property", value, line);
+        return new CssDeclaration(property, value, line);
     }
 
     @Override

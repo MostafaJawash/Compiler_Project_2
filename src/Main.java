@@ -40,7 +40,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-        String sourcePython = "Tests/PYTHON/Final tests/app.txt";
+        String sourcePython = "Tests/PYTHON/test3.txt";
         String pythonCode = Files.readString(Path.of(sourcePython));
         CharStream pyInput = CharStreams.fromString(pythonCode);
         pythonLexer pyLexer = new pythonLexer(pyInput);
@@ -58,7 +58,7 @@ public class Main {
 
         System.out.println();
 
-        String sourceHtml = "Tests/HTML + JINJA + CSS/Final tests/index.txt";
+        String sourceHtml = "Tests/HTML + JINJA + CSS/test3.txt";
         String htmlCode = Files.readString(Path.of(sourceHtml));
         CharStream htmlInput = CharStreams.fromString(htmlCode);
         HTMLLexer htmlLexer = new HTMLLexer(htmlInput);
@@ -79,10 +79,15 @@ public class Main {
         System.out.println();
 
         System.out.println("Symbol table python (Flask):");
+        SymbolTable rootTable = pyVisitor.symbolTable;
+        while (rootTable.getParent() != null) {
+            rootTable = rootTable.getParent();
+        }
         pyVisitor.symbolTable.printTable();
         System.out.println("------------------------------------------------------------");
         System.out.println("Symbol table HTML:");
-        //call print here
+        System.out.println("Symbol table HTML (Tags + Jinja + CSS):");
+        htmlVisitor.htmlST.printTable();
         System.out.println("------------------------------------------------------------");
         System.out.println("THE END");
 
