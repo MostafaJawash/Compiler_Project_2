@@ -24,7 +24,7 @@ styleElement
     ;
 
 htmlAttribute
-    :  TAG_NAME  (EQUALS SPACE_ATT? attrValue )?
+    :  TAG_NAME  (EQUALS attrValue)?
     ;
 
 attrValue
