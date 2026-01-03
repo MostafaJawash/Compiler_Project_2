@@ -7,7 +7,7 @@ htmlDocument
     ;
 
 doctype
-    : DOC HTML_DOCTYPE SPACE_DOCTYPE? HTML DOCTYPE_CLOSE
+    : DOC HTML_DOCTYPE HTML DOCTYPE_CLOSE
     ;
 
 htmlElement

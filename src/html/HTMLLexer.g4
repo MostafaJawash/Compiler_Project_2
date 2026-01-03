@@ -35,7 +35,7 @@ SQ:  [']->popMode;
 //------------------------------------------------------------------------------------------
 
 mode DOCTYPE;
-SPACE_DOCTYPE: (' ' | '\t' | '\r'? '\n')+;
+SPACE_DOCTYPE: (' ' | '\t' | '\r'? '\n')+ -> skip;
 HTML_DOCTYPE:  [dD][oO][cC][tT][yY][pP][eE];
 HTML: 'html';
 DOCTYPE_CLOSE: '>' -> popMode;
