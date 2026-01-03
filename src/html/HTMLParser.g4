@@ -24,12 +24,12 @@ styleElement
     ;
 
 htmlAttribute
-    : SPACE_TAG TAG_NAME SPACE_TAG? (EQUALS SPACE_ATT? attrValue SPACE_TAG?)?
+    :  TAG_NAME  (EQUALS SPACE_ATT? attrValue )?
     ;
 
 attrValue
-    : JINJA_VAR_DQ (expr | exprMath | funCall | exprLogic)? VARIABLE_END SPACE_ATT? (VJ_OPEN SPACE_ATT? (expr | exprMath | funCall | exprLogic )? SPACE_ATT? VARIABLE_END SPACE_ATT?)* DQ  #dqJINJA
-    | JINJA_VAR_SQ (expr | exprMath | funCall | exprLogic)? VARIABLE_END SPACE_ATT? (VJ_OPEN SPACE_ATT? (expr | exprMath | funCall | exprLogic)? SPACE_ATT? VARIABLE_END SPACE_ATT?)* SQ  #sqJINJA
+    : JINJA_VAR_DQ (expr | exprMath | funCall | exprLogic)? VARIABLE_END  (VJ_OPEN  (expr | exprMath | funCall | exprLogic )?  VARIABLE_END )* DQ  #dqJINJA
+    | JINJA_VAR_SQ (expr | exprMath | funCall | exprLogic)? VARIABLE_END  (VJ_OPEN  (expr | exprMath | funCall | exprLogic)?  VARIABLE_END )* SQ  #sqJINJA
     | ATTR_VALUE #attValue
     ;
 

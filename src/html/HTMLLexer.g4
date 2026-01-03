@@ -14,7 +14,7 @@ TAG_OPEN: '<' -> pushMode(TAG);
 //------------------------------------------------------------------------------------------
 
 mode TAG;
-SPACE_TAG: (' ' | '\t' | '\r'? '\n')+;
+SPACE_TAG: (' ' | '\t' | '\r'? '\n') -> skip;
 TAG_CLOSE: '>' -> popMode;
 TAG_SLASH_CLOSE: '/>' -> popMode;
 TAG_SLASH: '/';
@@ -24,7 +24,7 @@ TAG_NAME: [a-zA-Z][a-zA-Z0-9]*;
 //------------------------------------------------------------------------------------------
 
 mode ATTVALUE;
-SPACE_ATT: (' ' | '\t' | '\r'? '\n')+;
+SPACE_ATT: (' ' | '\t' | '\r'? '\n')+ -> skip;
 ATTR_VALUE: ('"' (~["{=}])* '"' | '\'' (~['{=}])* '\'' |  ~[ {}<>='"/]+) -> popMode;
 JINJA_VAR_DQ:  '"{{' -> pushMode(JINJA);
 JINJA_VAR_SQ:  '\'{{' -> pushMode(JINJA);
