@@ -91,7 +91,7 @@ arguments
 
 argument
     : arg #nonAssign
-    | IDENTIFIER(DOT IDENTIFIER)*(EQUAL valueFun)? #assign
+    | IDENTIFIER(DOT IDENTIFIER)*(EQUAL valueFun) #assign
     ;
 
 arg
