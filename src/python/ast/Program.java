@@ -14,6 +14,10 @@ public class Program extends ASTNode {
         this.children.add(child);
     }
 
+    public ArrayList<Statement> getChildren() {
+        return children;
+    }
+
 
     @Override
     public String toString(int level) {

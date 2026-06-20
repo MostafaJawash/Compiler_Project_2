@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Semantic Error Test</title>
+</head>
+<body>
+    <h1>{{ user.name }}</h1>
+    {% for item in products %}
+        <span>{{ item.name }}</span>
+    {% endfor %}
+</body>
+</html>

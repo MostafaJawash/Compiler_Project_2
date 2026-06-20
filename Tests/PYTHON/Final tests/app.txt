@@ -50,3 +50,5 @@ def delete_product(id):
             break
         cnt+=1
     return redirect(url_for("index"))
+total_price = "Price"
+final_score = total_price + 150

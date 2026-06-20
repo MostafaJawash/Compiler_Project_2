@@ -1,6 +1,6 @@
 package python.visitor;
-
 import python.generated.pythonParser;
+
 import python.generated.pythonParserBaseVisitor;
 import python.ast.ASTNode;
 import python.ast.Access.AccessPart;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class visitorAst extends pythonParserBaseVisitor {
-    public SymbolTable symbolTable = new SymbolTable(null);
+    public SymbolTable symbolTable = new SymbolTable();
 
     @Override
     public Program visitFile_input(pythonParser.File_inputContext ctx) {
@@ -556,13 +556,14 @@ public class visitorAst extends pythonParserBaseVisitor {
         int line = ctx.getStart().getLine();
         String funcName = ctx.IDENTIFIER().getText();
         symbolTable.insert(funcName, "Function", line);
-        symbolTable = new SymbolTable(symbolTable);
+        symbolTable.pushScope("Function_" + funcName);
+
         IdentifierNode name = new IdentifierNode(line, funcName);
         ArrayList<Pair<Expr, Expr>> arg = null;
         if (ctx.arguments() != null)
             arg = (ArrayList<Pair<Expr, Expr>>) visit(ctx.arguments());
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
-        symbolTable = symbolTable.getParent();
+        symbolTable.pushScope("Function_" + funcName);
         return new FunDefNode(line, name, arg, body);
     }
 
@@ -689,7 +690,7 @@ public class visitorAst extends pythonParserBaseVisitor {
     @Override
     public ASTNode visitFor_stmt(pythonParser.For_stmtContext ctx) {
         int line = ctx.getStart().getLine();
-        symbolTable = new SymbolTable(symbolTable);
+        symbolTable.pushScope("For_Loop");
         ArrayList<IdentifierNode> vars = new ArrayList<>();
         IdentifierNode current = null;
 
@@ -707,6 +708,7 @@ public class visitorAst extends pythonParserBaseVisitor {
                     symbolTable.insert(varName, "Loop Variable", line);
                 } else {
                     current.addParts(new FieldAccess(line, varName));
+                    symbolTable.insert(varName, "Loop Variable", line);
                 }
             } else if (text.equals(",")) {
                 vars.add(current);
@@ -740,8 +742,9 @@ public class visitorAst extends pythonParserBaseVisitor {
             }
         }
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
-        symbolTable = symbolTable.getParent();
 
+        // 3. إغلاق سكوب الحلقة
+        symbolTable.popScope();
         return new ForStmtNode(line, vars, inExpr, body);
     }
 

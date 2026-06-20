@@ -28,10 +28,20 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitHtmlElement(HTMLParser.HtmlElementContext ctx) {
         if (ctx.styleElement() != null) return visit(ctx.styleElement());
 
-        String tagName = ctx.TAG_NAME(0).getText();
+        String tagName = ctx.TAG_NAME(0).getText().toLowerCase();
         int line = ctx.getStart().getLine();
 
-        htmlST.addSymbol(tagName, "HTML_TAG", "Node", line);
+        if (tagName.equals("form")) {
+            htmlST.addSymbol(tagName, "Form_Structure", "Container", line);
+        } else if (tagName.equals("input")) {
+            htmlST.addSymbol(tagName, "Input_Field", "Interactive", line);
+        } else if (tagName.equals("textarea")) {
+            htmlST.addSymbol(tagName, "Text_Area", "Multi-line Input", line);
+        } else if (tagName.equals("button")) {
+            htmlST.addSymbol(tagName, "Button_Action", "Submit/Click", line);
+        } else if (tagName.equals("div")) {
+            htmlST.addSymbol(tagName, "Div_Block", "Layout Layout", line);
+        }
 
         boolean hasAttributes = ctx.htmlAttribute() != null && !ctx.htmlAttribute().isEmpty();
         boolean hasContent = ctx.htmlContent() != null && ctx.htmlContent().getChildCount() > 0;
@@ -41,18 +51,15 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
         if (hasAttributes || hasContent) {
             htmlST.pushScope("Tag_" + tagName);
-
             attributes = ctx.htmlAttribute().stream()
                     .map(a -> (HtmlAttribute) visit(a))
                     .collect(Collectors.toList());
-
             if (ctx.htmlContent() != null) {
                 for (int i = 0; i < ctx.htmlContent().getChildCount(); i++) {
                     Node child = visit(ctx.htmlContent().getChild(i));
                     if (child != null) children.add(child);
                 }
             }
-
             htmlST.popScope();
         }
         return new HtmlElement(tagName, attributes, children, line);
@@ -90,10 +97,13 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
 
     @Override
+    public Node visitJinjaVariableTemplate(HTMLParser.JinjaVariableTemplateContext ctx) {
+        return visit(ctx.variable());
+    }
 
-    public Node visitVariable(HTMLParser.VariableContext ctx) {
-        Node expression = ctx.getChildCount() >= 3 ? visit(ctx.getChild(1)) : new TextNode("", ctx.getStart().getLine());
-        return new JinjaExpressionNode(expression, ctx.getStart().getLine());
+    @Override
+    public Node visitJinjaBlockTemplate(HTMLParser.JinjaBlockTemplateContext ctx) {
+        return visit(ctx.block());
     }
 
     @Override
@@ -364,24 +374,43 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
 
 
     @Override
-    public Node visitOrExpr(HTMLParser.OrExprContext ctx) {
-        return new LogicNode(visit(ctx.getChild(0)), ctx.getChildCount() > 2 ? visit(ctx.getChild(2)) : null, ctx.getStart().getLine());
+    public Node visitLogicalOrExpression(HTMLParser.LogicalOrExpressionContext ctx) {
+        return visit(ctx.orExpr());
     }
 
     @Override
-    public Node visitAndExpr(HTMLParser.AndExprContext ctx) {
-        return new LogicNode(visit(ctx.getChild(0)), ctx.getChildCount() > 2 ? visit(ctx.getChild(2)) : null, ctx.getStart().getLine());
+    public Node visitBinaryOrExpr(HTMLParser.BinaryOrExprContext ctx) {
+        // تم تصحيح جلب العناصر المتوافقة مع الـ Context الحالي لديكِ لمنع الخطأ
+        Node left = visit(ctx.getChild(0));
+        Node right = visit(ctx.getChild(2));
+        return new LogicNode(left, right, ctx.getStart().getLine());
     }
 
     @Override
-
-    public Node visitNotExpr(HTMLParser.NotExprContext ctx) {
-        return new LogicNode(visit(ctx.getChild(1)), null, ctx.getStart().getLine());
+    public Node visitPassToAndExpr(HTMLParser.PassToAndExprContext ctx) {
+        return visit(ctx.andExpr());
+    }
+    @Override
+    public Node visitBinaryAndExpr(HTMLParser.BinaryAndExprContext ctx) {
+        // تم تصحيح جلب العناصر المتوافقة مع الـ Context الحالي لديكِ لمنع الخطأ
+        Node left = visit(ctx.getChild(0));
+        Node right = visit(ctx.getChild(2));
+        return new LogicNode(left, right, ctx.getStart().getLine());
     }
 
     @Override
-    public Node visitCompareExpr(HTMLParser.CompareExprContext ctx) {
-        return new LogicNode(visit(ctx.getChild(0)), visit(ctx.getChild(2)), ctx.getStart().getLine());
+    public Node visitPassToNotExpr(HTMLParser.PassToNotExprContext ctx) {
+        return visit(ctx.notExpr());
+    }
+    @Override
+    public Node visitUnaryNotExpr(HTMLParser.UnaryNotExprContext ctx) {
+        // تم تصحيح جلب العناصر المتوافقة مع الـ Context الحالي لديكِ لمنع الخطأ
+        Node expression = visit(ctx.getChild(1));
+        return new LogicNode(expression, null, ctx.getStart().getLine());
+    }
+    @Override
+    public Node visitPassToCompareExpr(HTMLParser.PassToCompareExprContext ctx) {
+        return visit(ctx.compareExpr());
     }
 
     @Override

@@ -34,7 +34,8 @@ attrValue
     ;
 
 template
-    : variable | block
+    : variable #JinjaVariableTemplate
+    | block    #JinjaBlockTemplate
     ;
 
 variable
@@ -113,20 +114,22 @@ valueFun
     ;
 
 exprLogic
-    : orExpr
+    : orExpr #logicalOrExpression
     ;
 
 orExpr
-    : andExpr (OR andExpr)*
+    : orExpr OR andExpr #binaryOrExpr
+    | andExpr           #passToAndExpr
     ;
 
 andExpr
-    : notExpr (AND notExpr)*
+    : andExpr AND notExpr #binaryAndExpr
+    | notExpr             #passToNotExpr
     ;
 
 notExpr
-    : NOT notExpr
-    | compareExpr
+    : NOT notExpr  #unaryNotExpr
+    | compareExpr  #passToCompareExpr
     ;
 
 compareExpr

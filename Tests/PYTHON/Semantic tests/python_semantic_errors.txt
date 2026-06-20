@@ -1,0 +1,14 @@
+from flask import Flask, render_template
+app = Flask(__name__)
+products = []
+
+@app.route("/")
+def index():
+    return render_template("semantic_template.html", products=products)
+
+x = y
+name = "speaker"
+wrong_math = name - 5
+total_price = "Price"
+final_score = total_price + 150
+break

@@ -1,18 +1,15 @@
 import python.ast.Program;
-import python.symbolTable.Symbol;
-import python.symbolTable.SymbolTable;
+import python.visitor.PythonAdvancedSemanticChecker;
 import python.visitor.visitorAst;
 import python.generated.pythonLexer;
 import python.generated.pythonParser;
-
 import html.ast.Node;
 import html.visitor.AstBuilder;
+import html.visitor.HtmlJinjaCssSemanticChecker;
 import html.generated.HTMLLexer;
 import html.generated.HTMLParser;
-
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -20,82 +17,107 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+    private static final boolean SHOW_PARSE_TREE = true;
+    private static final boolean RUN_SEMANTIC_ERROR_DEMO = true; // true -> semantic error - false -> basic output
+
     static class NodeData {
         String label;
         ParseTree tree;
-
-        NodeData(String label, ParseTree tree) {
-            this.label = label;
-            this.tree = tree;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
+        NodeData(String label, ParseTree tree) { this.label = label; this.tree = tree; }
+        @Override public String toString() { return label; }
     }
 
     public static void main(String[] args) throws IOException {
-        String sourcePython = "Tests/PYTHON/Final tests/app.txt";
+        String sourcePython = RUN_SEMANTIC_ERROR_DEMO
+                ? "Tests/PYTHON/Semantic tests/python_semantic_errors.txt"
+                : "Tests/PYTHON/Final tests/app.txt";
+
         String pythonCode = Files.readString(Path.of(sourcePython));
-        CharStream pyInput = CharStreams.fromString(pythonCode);
-        pythonLexer pyLexer = new pythonLexer(pyInput);
-        CommonTokenStream pyTokens = new CommonTokenStream(pyLexer);
-        pythonParser pyParser = new pythonParser(pyTokens);
+        pythonParser pyParser = new pythonParser(new CommonTokenStream(new pythonLexer(CharStreams.fromString(pythonCode))));
         ParseTree pyTree = pyParser.file_input();
         visitorAst pyVisitor = new visitorAst();
         Program pyAst = (Program) pyVisitor.visit(pyTree);
-        System.out.println("AST Python (Flask):");
-        System.out.println(pyAst);
-        System.out.println("------------------------------------------------------------");
-        System.out.println("Parse Tree Python:");
-        System.out.println(pyTree.toStringTree(pyParser));
-        System.out.println("------------------------------------------------------------");
 
-        System.out.println();
-
-        String sourceHtml = "Tests/HTML + JINJA + CSS/Final tests/index.txt";
-        String htmlCode = Files.readString(Path.of(sourceHtml));
-        CharStream htmlInput = CharStreams.fromString(htmlCode);
-        HTMLLexer htmlLexer = new HTMLLexer(htmlInput);
-        CommonTokenStream htmlTokens = new CommonTokenStream(htmlLexer);
-        HTMLParser htmlParser = new HTMLParser(htmlTokens);
-        ParseTree htmlTree = htmlParser.htmlDocument();
-        AstBuilder htmlVisitor = new AstBuilder();
-        Node htmlAst = htmlVisitor.visit(htmlTree);
-        System.out.println("AST HTML (CSS+JINJA):");
-        if (htmlAst != null) {
-            System.out.println(htmlAst.prettyPrint(0));
+        if (!RUN_SEMANTIC_ERROR_DEMO) {
+            System.out.println("AST Python (Flask):\n" + pyAst);
+            System.out.println("------------------------------------------------------------");
+            System.out.println("Parse Tree Python:\n" + pyTree.toStringTree(pyParser));
+            System.out.println("------------------------------------------------------------");
         }
-        System.out.println("------------------------------------------------------------");
-        System.out.println("Parse Tree HTML:");
-        System.out.println(htmlTree.toStringTree(htmlParser));
-        System.out.println("------------------------------------------------------------");
 
-        System.out.println();
+        PythonAdvancedSemanticChecker pythonChecker = new PythonAdvancedSemanticChecker();
+        HtmlJinjaCssSemanticChecker htmlChecker = new HtmlJinjaCssSemanticChecker(pythonCode);
 
+        if (RUN_SEMANTIC_ERROR_DEMO) {
+            pythonChecker.check(pyAst);
+            System.out.println("Executing Advanced Semantic Analysis Pipeline...");
+        }
+
+        String[] htmlPaths = RUN_SEMANTIC_ERROR_DEMO
+                ? new String[]{"Tests/HTML + JINJA + CSS/Semantic tests/semantic_template.txt"}
+                : new String[]{"Tests/HTML + JINJA + CSS/Final tests/index.txt", "Tests/HTML + JINJA + CSS/Final tests/add.txt", "Tests/HTML + JINJA + CSS/Final tests/details.txt"};
+
+        AstBuilder firstHtmlVisitor = null;
+        for (String htmlPath : htmlPaths) {
+            String htmlCode = Files.readString(Path.of(htmlPath));
+            if (RUN_SEMANTIC_ERROR_DEMO) htmlChecker.checkTemplate(Path.of(htmlPath).getFileName().toString(), htmlCode);
+
+            HTMLParser htmlParser = new HTMLParser(new CommonTokenStream(new HTMLLexer(CharStreams.fromString(htmlCode))));
+            AstBuilder htmlVisitor = new AstBuilder();
+            htmlVisitor.visit(htmlParser.htmlDocument());
+            if (firstHtmlVisitor == null) firstHtmlVisitor = htmlVisitor;
+        }
+
+        if (RUN_SEMANTIC_ERROR_DEMO) {
+            printUnifiedSemanticReport(pythonChecker, htmlChecker);
+        }
+
+        // --- طباعة جداول الرموز ---
         System.out.println("Symbol table python (Flask):");
-        SymbolTable rootTable = pyVisitor.symbolTable;
-        while (rootTable.getParent() != null) {
-            rootTable = rootTable.getParent();
-        }
         pyVisitor.symbolTable.printTable();
-        System.out.println("------------------------------------------------------------");
-        System.out.println("Symbol table HTML:");
-        System.out.println("Symbol table HTML (Tags + Jinja + CSS):");
-        htmlVisitor.htmlST.printTable();
-        System.out.println("------------------------------------------------------------");
-        System.out.println("THE END");
 
-        //this to check from parse tree for python because we used custom logic
-        showParseTree(pythonCode, pyTree, pyParser);
+        // التعديل هنا: لن يظهر جدول HTML إلا في الوضع السليم (false)
+        if (firstHtmlVisitor != null && !RUN_SEMANTIC_ERROR_DEMO) {
+            System.out.println("\n=====================================================================================");
+            System.out.println("Symbol table HTML/Jinja/CSS:");
+            System.out.println("=====================================================================================");
+            firstHtmlVisitor.htmlST.printTable();
+        }
 
-        //we do not need this, we can test parse tree for html in antlr preview
-        //showParseTree(htmlCode, htmlTree, htmlParser);
+        if (SHOW_PARSE_TREE) SwingUtilities.invokeLater(() -> showParseTree(pythonCode, pyTree, pyParser));
+    }
+
+    private static void printUnifiedSemanticReport(PythonAdvancedSemanticChecker pythonChecker,
+                                                   HtmlJinjaCssSemanticChecker htmlChecker) {
+        System.out.println("\n------------------------------------------------------------");
+        System.out.println("              UNIFIED SEMANTIC ERRORS REPORT                ");
+        System.out.println("------------------------------------------------------------");
+
+        int total = 0;
+        total += printCategory("Category 1", "Undefined Variable Errors", pythonChecker.getUndefinedVariableErrors());
+        total += printCategory("Category 2", "Type Errors", pythonChecker.getTypeErrors());
+        total += printCategory("Category 3", "Scope Errors", pythonChecker.getScopeErrors());
+        total += printCategory("Category 4", "Type Mismatch Errors", pythonChecker.getTypeMismatchErrors());
+        total += printCategory("Category 5", "Missing Flask Variable Errors", htmlChecker.getMissingFlaskVariableErrors());
+
+        System.out.println("\n[Analysis Summary]: " + (total == 0 ? "✔ PASSED" : "❌ FAILED (" + total + " Errors)"));
+        System.out.println("------------------------------------------------------------\n");
+    }
+
+    private static int printCategory(String title, String subtitle, List<String> errors) {
+        System.out.println("▶ [" + title + "] " + subtitle + ":");
+        if (errors == null || errors.isEmpty()) {
+            System.out.println("............................................................");
+            return 0;
+        }
+        for (String err : errors) {
+            System.out.println("   ❌ " + err);
+        }
+        System.out.println("............................................................");
+        return errors.size();
     }
 
     private static void showParseTree(String code, ParseTree parseTree, Parser parser) {
@@ -104,65 +126,23 @@ public class Main {
         frame.setSize(1200, 750);
         JTextArea codeArea = new JTextArea(code);
         codeArea.setFont(new Font("Consolas", Font.PLAIN, 14));
-        codeArea.setEditable(false);
         JScrollPane codeScroll = new JScrollPane(codeArea);
         JTree tree = new JTree(new DefaultTreeModel(buildNode(parseTree, parser)));
         expandAll(tree);
-        JScrollPane treeScroll = new JScrollPane(tree);
-        tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            if (node == null)
-                return;
-            Object obj = node.getUserObject();
-            if (!(obj instanceof NodeData data))
-                return;
-            List<Token> tokens = new ArrayList<>();
-            collectTokens(data.tree, tokens);
-            if (tokens.isEmpty())
-                return;
-            int start = tokens.get(0).getStartIndex();
-            int stop = tokens.get(tokens.size() - 1).getStopIndex() + 1;
-            int len = codeArea.getDocument().getLength();
-            start = Math.min(start, len);
-            stop = Math.min(stop, len);
-            codeArea.requestFocus();
-            codeArea.setCaretPosition(start);
-            codeArea.moveCaretPosition(stop);
-        });
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, codeScroll);
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(tree), codeScroll);
         split.setDividerLocation(450);
         frame.add(split);
         frame.setVisible(true);
     }
 
     private static DefaultMutableTreeNode buildNode(ParseTree tree, Parser parser) {
-        String label;
-        if (tree instanceof RuleNode r) {
-            label = parser.getRuleNames()[r.getRuleContext().getRuleIndex()];
-        } else {
-            label = tree.getText();
-        }
+        String label = (tree instanceof RuleNode r) ? parser.getRuleNames()[r.getRuleContext().getRuleIndex()] : tree.getText();
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(new NodeData(label, tree));
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            node.add(buildNode(tree.getChild(i), parser));
-        }
+        for (int i = 0; i < tree.getChildCount(); i++) node.add(buildNode(tree.getChild(i), parser));
         return node;
     }
 
     private static void expandAll(JTree tree) {
-        for (int i = 0; i < tree.getRowCount(); i++) {
-            tree.expandRow(i);
-        }
-    }
-
-    private static void collectTokens(ParseTree tree, List<Token> tokens) {
-        if (tree instanceof TerminalNode tn) {
-            Token tok = tn.getSymbol();
-            if (tok != null) tokens.add(tok);
-        }
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            collectTokens(tree.getChild(i), tokens);
-        }
+        for (int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
     }
 }
-

@@ -1,47 +1,81 @@
 package python.symbolTable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SymbolTable {
-    private Map<String, Symbol> symbols = new HashMap<>();
-    private SymbolTable parent;
 
-    public SymbolTable(SymbolTable parent) {
-        this.parent = parent;
-    }
+    private class Scope {
+        String name;
+        Scope parent;
+        List<Symbol> symbols = new ArrayList<>();
 
-    public void insert(String name, String type, int line) {
-        if (!symbols.containsKey(name)) {
-            symbols.put(name, new Symbol(name, type, line));
-        } else {
-            System.err.println("Error: " + name + " already defined in this scope.");
+        Scope(String name, Scope parent) {
+            this.name = name;
+            this.parent = parent;
         }
     }
 
+    private Scope currentScope;
+    private List<Scope> allScopes = new ArrayList<>(); // لتخزين كافة النطاقات للطباعة النهائية
+
+    public SymbolTable() {
+
+        currentScope = new Scope("Global_Python", null);
+        allScopes.add(currentScope);
+    }
+
+    public void pushScope(String name) {
+        currentScope = new Scope(name, currentScope);
+        allScopes.add(currentScope);
+    }
+
+    public void popScope() {
+        if (currentScope.parent != null) {
+            currentScope = currentScope.parent;
+        }
+    }
+
+    public void insert(String name, String type, int line) {
+
+        for (Symbol s : currentScope.symbols) {
+            if (s.name.equals(name)) {
+                System.err.println("Error: Symbol '" + name + "' already defined in scope: " + currentScope.name);
+                return;
+            }
+        }
+        currentScope.symbols.add(new Symbol(name, type, line));
+    }
+
     public Symbol lookup(String name) {
-        if (symbols.containsKey(name)) return symbols.get(name);
-        if (parent != null) return parent.lookup(name);
+        Scope temp = currentScope;
+        while (temp != null) {
+            for (Symbol s : temp.symbols) {
+                if (s.name.equals(name)) return s;
+            }
+            temp = temp.parent;
+        }
         return null;
     }
 
     public void printTable() {
-        System.out.println("\n--- Symbol Table ---");
-        if (symbols.isEmpty()) {
-            System.out.println("(Empty Scope)");
-        } else {
-            for (Symbol s : symbols.values()) {
-                System.out.println("Node: " + s.name + " | Type: " + s.type + " | Line: " + s.line);
+        System.out.println("\n" + "=".repeat(85));
+        System.out.println("PYTHON SYMBOL TABLE REPORT");
+        System.out.println("=".repeat(85));
+
+        int scopeCounter = 1;
+
+        for (Scope scope : allScopes) {
+
+            if (!scope.symbols.isEmpty()) {
+                System.out.println("\n--- SCOPE #" + scopeCounter + " [" + scope.name + "] ---");
+                for (Symbol s : scope.symbols) {
+                    System.out.printf("| Symbol: %-15s | Type: %-12s | Line: %-3d |\n",
+                            s.name, s.type, s.line);
+                }
+                scopeCounter++;
             }
         }
-
-        if (parent != null) {
-            System.out.println(">>> Linked to Parent Scope:");
-            parent.printTable();
-        }
-    }
-
-    public SymbolTable getParent() {
-        return parent;
+        System.out.println("\n" + "=".repeat(85));
     }
 }
