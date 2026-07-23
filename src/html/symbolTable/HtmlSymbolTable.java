@@ -34,7 +34,24 @@ public class HtmlSymbolTable {
     }
 
     public void addSymbol(String name, String type, String value, int line) {
+        for (HtmlSymbol s : currentScope.symbols) {
+            if (s.name.equals(name)) {
+                System.err.println("Error: Symbol '" + name + "' already defined in scope: " + currentScope.name);
+                return;
+            }
+        }
         currentScope.symbols.add(new HtmlSymbol(name, type, value, line));
+    }
+
+    public HtmlSymbol lookup(String name) {
+        Scope temp = currentScope;
+        while (temp != null) {
+            for (HtmlSymbol s : temp.symbols) {
+                if (s.name.equals(name)) return s;
+            }
+            temp = temp.parent;
+        }
+        return null;
     }
 
     public void printTable() {

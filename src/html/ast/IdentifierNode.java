@@ -8,6 +8,10 @@ public class IdentifierNode extends BaseAstNode {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         return indent(indent) + "IdentifierNode: " + name + " [line=" + line + "]\n";

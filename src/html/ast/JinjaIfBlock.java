@@ -14,6 +14,18 @@ public class JinjaIfBlock extends BaseAstNode {
         this.elseBody = elseBody;
     }
 
+    public Node getCondition() {
+        return condition;
+    }
+
+    public List<Node> getBody() {
+        return body;
+    }
+
+    public List<Node> getElseBody() {
+        return elseBody;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         StringBuilder sb = new StringBuilder();

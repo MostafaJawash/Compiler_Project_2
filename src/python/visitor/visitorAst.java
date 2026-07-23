@@ -117,9 +117,10 @@ public class visitorAst extends pythonParserBaseVisitor {
     public ASTNode visitAssignment_multiple(pythonParser.Assignment_multipleContext ctx) {
         int line = ctx.getStart().getLine();
         ArrayList<IdentifierNode> targets = new ArrayList<>();
+        String valueText = ctx.value_stmt().getText();
         for (pythonParser.TargetContext t : ctx.target()) {
             String varName = t.getText();
-            symbolTable.insert(varName, "Variable", line);
+            symbolTable.insert(varName, "Variable", valueText, line);
             targets.add((IdentifierNode) visit(t));
         }
         Expr value = (Expr) visit(ctx.value_stmt());
@@ -555,7 +556,7 @@ public class visitorAst extends pythonParserBaseVisitor {
     public ASTNode visitFun_def(pythonParser.Fun_defContext ctx) {
         int line = ctx.getStart().getLine();
         String funcName = ctx.IDENTIFIER().getText();
-        symbolTable.insert(funcName, "Function", line);
+        symbolTable.insert(funcName, "Function", "", line);
         symbolTable.pushScope("Function_" + funcName);
 
         IdentifierNode name = new IdentifierNode(line, funcName);
@@ -563,7 +564,7 @@ public class visitorAst extends pythonParserBaseVisitor {
         if (ctx.arguments() != null)
             arg = (ArrayList<Pair<Expr, Expr>>) visit(ctx.arguments());
         ArrayList<Statement> body = (ArrayList<Statement>) visit(ctx.suite());
-        symbolTable.pushScope("Function_" + funcName);
+        symbolTable.popScope();
         return new FunDefNode(line, name, arg, body);
     }
 
@@ -705,10 +706,10 @@ public class visitorAst extends pythonParserBaseVisitor {
 
                 if (current == null) {
                     current = new IdentifierNode(line, varName);
-                    symbolTable.insert(varName, "Loop Variable", line);
+                    symbolTable.insert(varName, "Loop Variable", "", line);
                 } else {
                     current.addParts(new FieldAccess(line, varName));
-                    symbolTable.insert(varName, "Loop Variable", line);
+                    symbolTable.insert(varName, "Loop Variable", "", line);
                 }
             } else if (text.equals(",")) {
                 vars.add(current);

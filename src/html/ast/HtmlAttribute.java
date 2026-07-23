@@ -10,6 +10,14 @@ public class HtmlAttribute extends BaseAstNode {
         this.value = value;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public Node getValue() {
+        return value;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         String pad = indent(indent);

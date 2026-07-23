@@ -10,6 +10,14 @@ public class ArgumentNode extends BaseAstNode {
         this.value = value;
     }
 
+    public String getArgName() {
+        return argName;
+    }
+
+    public Node getValue() {
+        return value;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         String pad = indent(indent);

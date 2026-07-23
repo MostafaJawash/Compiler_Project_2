@@ -17,6 +17,18 @@ public class ArithmeticNode extends BaseAstNode {
         this.operator = operator;
     }
 
+    public Node getLeft() {
+        return left;
+    }
+
+    public Node getRight() {
+        return right;
+    }
+
+    public Operator getOperator() {
+        return operator;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         String pad = indent(indent);

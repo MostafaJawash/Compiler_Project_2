@@ -10,6 +10,10 @@ public class Program extends BaseAstNode {
         this.body = body;
     }
 
+    public List<Node> getBody() {
+        return body;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         StringBuilder sb = new StringBuilder();

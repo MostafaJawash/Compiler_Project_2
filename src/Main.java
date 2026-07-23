@@ -49,7 +49,7 @@ public class Main {
         }
 
         PythonAdvancedSemanticChecker pythonChecker = new PythonAdvancedSemanticChecker();
-        HtmlJinjaCssSemanticChecker htmlChecker = new HtmlJinjaCssSemanticChecker(pythonCode);
+        HtmlJinjaCssSemanticChecker htmlChecker = new HtmlJinjaCssSemanticChecker(pyAst);
 
         if (RUN_SEMANTIC_ERROR_DEMO) {
             pythonChecker.check(pyAst);
@@ -63,11 +63,12 @@ public class Main {
         AstBuilder firstHtmlVisitor = null;
         for (String htmlPath : htmlPaths) {
             String htmlCode = Files.readString(Path.of(htmlPath));
-            if (RUN_SEMANTIC_ERROR_DEMO) htmlChecker.checkTemplate(Path.of(htmlPath).getFileName().toString(), htmlCode);
+            String templateName = Path.of(htmlPath).getFileName().toString();
 
             HTMLParser htmlParser = new HTMLParser(new CommonTokenStream(new HTMLLexer(CharStreams.fromString(htmlCode))));
             AstBuilder htmlVisitor = new AstBuilder();
-            htmlVisitor.visit(htmlParser.htmlDocument());
+            Node htmlAst = htmlVisitor.visit(htmlParser.htmlDocument());
+            if (RUN_SEMANTIC_ERROR_DEMO) htmlChecker.checkTemplate(templateName, htmlAst);
             if (firstHtmlVisitor == null) firstHtmlVisitor = htmlVisitor;
         }
 
@@ -102,6 +103,7 @@ public class Main {
         total += printCategory("Category 3", "Scope Errors", pythonChecker.getScopeErrors());
         total += printCategory("Category 4", "Type Mismatch Errors", pythonChecker.getTypeMismatchErrors());
         total += printCategory("Category 5", "Missing Flask Variable Errors", htmlChecker.getMissingFlaskVariableErrors());
+        total += printCategory("Category 6", "HTML/Jinja Scope Errors", htmlChecker.getScopeErrors());
 
         System.out.println("\n[Analysis Summary]: " + (total == 0 ? "✔ PASSED" : "❌ FAILED (" + total + " Errors)"));
         System.out.println("------------------------------------------------------------\n");

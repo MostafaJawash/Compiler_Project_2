@@ -39,6 +39,11 @@ public class PythonAdvancedSemanticChecker {
     private int loopDepth = 0;
     private int functionDepth = 0;
 
+    // Every Scope ever created, kept even after its block/function has finished analysis.
+    // This is what lets analyzeIdentifier tell "never declared anywhere" (Undefined Variable)
+    // apart from "declared in a scope that has since closed" (Scope Error).
+    private final List<Scope> allScopes = new ArrayList<>();
+
     private static final String TYPE_UNKNOWN = "unknown";
     private static final String TYPE_NUMBER = "number";
     private static final String TYPE_STRING = "string";
@@ -76,9 +81,15 @@ public class PythonAdvancedSemanticChecker {
         }
     }
 
+    private Scope newScope(Scope parent) {
+        Scope scope = new Scope(parent);
+        allScopes.add(scope);
+        return scope;
+    }
+
     public void check(Program program) {
         clear();
-        Scope global = new Scope(null);
+        Scope global = newScope(null);
         for (String builtin : builtinNames) global.define(builtin, TYPE_UNKNOWN);
 
         if (program == null) return;
@@ -100,6 +111,7 @@ public class PythonAdvancedSemanticChecker {
         scopeErrors.clear();
         typeMismatchErrors.clear();
         reported.clear();
+        allScopes.clear();
         loopDepth = 0;
         functionDepth = 0;
     }
@@ -221,7 +233,7 @@ public class PythonAdvancedSemanticChecker {
         if (stmt instanceof ForStmtNode forStmt) {
             inferType(forStmt.inExpr, scope);
             loopDepth++;
-            Scope loopScope = new Scope(scope);
+            Scope loopScope = newScope(scope);
             if (forStmt.var != null) {
                 for (IdentifierNode id : forStmt.var) {
                     if (id != null) loopScope.define(id.root, TYPE_UNKNOWN);
@@ -242,7 +254,7 @@ public class PythonAdvancedSemanticChecker {
 
     private void analyzeBlock(List<Statement> body, Scope scope, boolean createNewScope) {
         if (body == null) return;
-        Scope blockScope = createNewScope ? new Scope(scope) : scope;
+        Scope blockScope = createNewScope ? newScope(scope) : scope;
         for (Statement s : body) analyzeStatement(s, blockScope);
     }
 
@@ -250,7 +262,7 @@ public class PythonAdvancedSemanticChecker {
         if (funDef == null) return;
         if (funDef.nameFun != null) parentScope.define(funDef.nameFun.root, TYPE_FUNCTION);
 
-        Scope functionScope = new Scope(parentScope);
+        Scope functionScope = newScope(parentScope);
         if (funDef.arguments != null) {
             for (Pair<Expr, Expr> arg : funDef.arguments) {
                 if (arg == null) continue;
@@ -397,7 +409,11 @@ public class PythonAdvancedSemanticChecker {
     private void analyzeIdentifier(IdentifierNode id, Scope scope) {
         if (id == null || id.root == null || id.root.isBlank()) return;
         if (!scope.contains(id.root) && !builtinNames.contains(id.root)) {
-            addUndefinedVariableError(id.lineNumber, id.root);
+            if (declaredInClosedScope(id.root, scope)) {
+                addOutOfScopeError(id.lineNumber, id.root);
+            } else {
+                addUndefinedVariableError(id.lineNumber, id.root);
+            }
         }
 
         // Indexes may contain identifiers too: product[index]
@@ -408,6 +424,26 @@ public class PythonAdvancedSemanticChecker {
                 }
             }
         }
+    }
+
+    /**
+     * True when `name` was declared in some scope that isn't part of the current scope chain
+     * (an ancestor of `scope`) - i.e. a function/loop block that has already finished analysis.
+     * That's variable-scope leakage (FIX 4), distinct from a name that was never declared anywhere.
+     */
+    private boolean declaredInClosedScope(String name, Scope scope) {
+        for (Scope candidate : allScopes) {
+            if (isAncestorOrSelf(candidate, scope)) continue;
+            if (candidate.containsLocal(name)) return true;
+        }
+        return false;
+    }
+
+    private boolean isAncestorOrSelf(Scope candidate, Scope scope) {
+        for (Scope s = scope; s != null; s = s.parent) {
+            if (s == candidate) return true;
+        }
+        return false;
     }
 
     private String atomType(Atom atom) {
@@ -447,6 +483,11 @@ public class PythonAdvancedSemanticChecker {
     private void addScopeError(int line, String details) {
         addUnique(scopeErrors, "SCOPE:" + line + ":" + details,
                 "Scope Error [line " + line + "]: " + details + ".");
+    }
+
+    private void addOutOfScopeError(int line, String variable) {
+        addUnique(scopeErrors, "OUT_OF_SCOPE:" + line + ":" + variable,
+                "Semantic Error (line " + line + "): variable '" + variable + "' is out of scope");
     }
 
     private void addTypeMismatchError(int line, String details) {

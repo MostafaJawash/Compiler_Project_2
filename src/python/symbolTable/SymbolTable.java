@@ -36,7 +36,7 @@ public class SymbolTable {
         }
     }
 
-    public void insert(String name, String type, int line) {
+    public void insert(String name, String type, String value, int line) {
 
         for (Symbol s : currentScope.symbols) {
             if (s.name.equals(name)) {
@@ -44,7 +44,7 @@ public class SymbolTable {
                 return;
             }
         }
-        currentScope.symbols.add(new Symbol(name, type, line));
+        currentScope.symbols.add(new Symbol(name, type, value, line));
     }
 
     public Symbol lookup(String name) {
@@ -70,8 +70,8 @@ public class SymbolTable {
             if (!scope.symbols.isEmpty()) {
                 System.out.println("\n--- SCOPE #" + scopeCounter + " [" + scope.name + "] ---");
                 for (Symbol s : scope.symbols) {
-                    System.out.printf("| Symbol: %-15s | Type: %-12s | Line: %-3d |\n",
-                            s.name, s.type, s.line);
+                    System.out.printf("| Symbol: %-15s | Type: %-12s | Value: %-25s | Line: %-3d |\n",
+                            s.name, s.type, s.value, s.line);
                 }
                 scopeCounter++;
             }
