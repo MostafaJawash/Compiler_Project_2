@@ -1,4 +1,4 @@
-// Generated from C:/Compiler_Project_2/src/html/HTMLParser.g4 by ANTLR 4.13.2
+// Generated from src/html/HTMLParser.g4 by ANTLR 4.13.2
 package html.generated;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -23,11 +23,915 @@ public interface HTMLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDoctype(HTMLParser.DoctypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link HTMLParser#htmlElement}.
+	 * Visit a parse tree produced by the {@code HtmlRootElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitHtmlElement(HTMLParser.HtmlElementContext ctx);
+	T visitHtmlRootElement(HTMLParser.HtmlRootElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code HtmlRootSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHtmlRootSelfClose(HTMLParser.HtmlRootSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code HeadElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHeadElement(HTMLParser.HeadElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code HeadSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHeadSelfClose(HTMLParser.HeadSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BodyElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBodyElement(HTMLParser.BodyElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BodySelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBodySelfClose(HTMLParser.BodySelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TitleElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTitleElement(HTMLParser.TitleElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TitleSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTitleSelfClose(HTMLParser.TitleSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MetaElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMetaElement(HTMLParser.MetaElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LinkElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLinkElement(HTMLParser.LinkElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ScriptElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitScriptElement(HTMLParser.ScriptElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ScriptSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitScriptSelfClose(HTMLParser.ScriptSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H1Element}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH1Element(HTMLParser.H1ElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H1SelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH1SelfClose(HTMLParser.H1SelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H2Element}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH2Element(HTMLParser.H2ElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H2SelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH2SelfClose(HTMLParser.H2SelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H3Element}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH3Element(HTMLParser.H3ElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H3SelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH3SelfClose(HTMLParser.H3SelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H4Element}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH4Element(HTMLParser.H4ElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H4SelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH4SelfClose(HTMLParser.H4SelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H5Element}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH5Element(HTMLParser.H5ElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H5SelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH5SelfClose(HTMLParser.H5SelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H6Element}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH6Element(HTMLParser.H6ElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code H6SelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitH6SelfClose(HTMLParser.H6SelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPElement(HTMLParser.PElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPSelfClose(HTMLParser.PSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SpanElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpanElement(HTMLParser.SpanElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SpanSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpanSelfClose(HTMLParser.SpanSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DivElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDivElement(HTMLParser.DivElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DivSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDivSelfClose(HTMLParser.DivSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BrElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBrElement(HTMLParser.BrElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code HrElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHrElement(HTMLParser.HrElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PreElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPreElement(HTMLParser.PreElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PreSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPreSelfClose(HTMLParser.PreSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BlockquoteElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlockquoteElement(HTMLParser.BlockquoteElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BlockquoteSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlockquoteSelfClose(HTMLParser.BlockquoteSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBElement(HTMLParser.BElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBSelfClose(HTMLParser.BSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code StrongElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStrongElement(HTMLParser.StrongElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code StrongSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStrongSelfClose(HTMLParser.StrongSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIElement(HTMLParser.IElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ISelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitISelfClose(HTMLParser.ISelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code EmElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEmElement(HTMLParser.EmElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code EmSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEmSelfClose(HTMLParser.EmSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code UElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUElement(HTMLParser.UElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code USelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUSelfClose(HTMLParser.USelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SmallElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSmallElement(HTMLParser.SmallElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SmallSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSmallSelfClose(HTMLParser.SmallSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MarkElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMarkElement(HTMLParser.MarkElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MarkSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMarkSelfClose(HTMLParser.MarkSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SubElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSubElement(HTMLParser.SubElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SubSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSubSelfClose(HTMLParser.SubSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SupElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSupElement(HTMLParser.SupElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SupSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSupSelfClose(HTMLParser.SupSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code UlElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUlElement(HTMLParser.UlElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code UlSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUlSelfClose(HTMLParser.UlSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code OlElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOlElement(HTMLParser.OlElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code OlSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOlSelfClose(HTMLParser.OlSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LiElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiElement(HTMLParser.LiElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LiSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiSelfClose(HTMLParser.LiSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DlElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDlElement(HTMLParser.DlElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DlSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDlSelfClose(HTMLParser.DlSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DtElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDtElement(HTMLParser.DtElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DtSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDtSelfClose(HTMLParser.DtSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DdElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDdElement(HTMLParser.DdElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DdSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDdSelfClose(HTMLParser.DdSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAElement(HTMLParser.AElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ASelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitASelfClose(HTMLParser.ASelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ImgElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImgElement(HTMLParser.ImgElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AudioElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAudioElement(HTMLParser.AudioElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AudioSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAudioSelfClose(HTMLParser.AudioSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code VideoElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVideoElement(HTMLParser.VideoElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code VideoSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVideoSelfClose(HTMLParser.VideoSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SourceElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceElement(HTMLParser.SourceElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IframeElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIframeElement(HTMLParser.IframeElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IframeSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIframeSelfClose(HTMLParser.IframeSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TableElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTableElement(HTMLParser.TableElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TableSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTableSelfClose(HTMLParser.TableSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TheadElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTheadElement(HTMLParser.TheadElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TheadSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTheadSelfClose(HTMLParser.TheadSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TbodyElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTbodyElement(HTMLParser.TbodyElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TbodySelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTbodySelfClose(HTMLParser.TbodySelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TfootElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTfootElement(HTMLParser.TfootElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TfootSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTfootSelfClose(HTMLParser.TfootSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TrElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTrElement(HTMLParser.TrElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TrSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTrSelfClose(HTMLParser.TrSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ThElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitThElement(HTMLParser.ThElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ThSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitThSelfClose(HTMLParser.ThSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TdElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTdElement(HTMLParser.TdElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TdSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTdSelfClose(HTMLParser.TdSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code CaptionElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCaptionElement(HTMLParser.CaptionElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code CaptionSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCaptionSelfClose(HTMLParser.CaptionSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FormElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFormElement(HTMLParser.FormElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FormSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFormSelfClose(HTMLParser.FormSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code InputElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInputElement(HTMLParser.InputElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ButtonElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitButtonElement(HTMLParser.ButtonElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ButtonSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitButtonSelfClose(HTMLParser.ButtonSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SelectElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelectElement(HTMLParser.SelectElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SelectSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelectSelfClose(HTMLParser.SelectSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code OptionElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptionElement(HTMLParser.OptionElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code OptionSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptionSelfClose(HTMLParser.OptionSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TextareaElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTextareaElement(HTMLParser.TextareaElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code TextareaSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTextareaSelfClose(HTMLParser.TextareaSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LabelElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLabelElement(HTMLParser.LabelElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LabelSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLabelSelfClose(HTMLParser.LabelSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FieldsetElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFieldsetElement(HTMLParser.FieldsetElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FieldsetSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFieldsetSelfClose(HTMLParser.FieldsetSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LegendElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLegendElement(HTMLParser.LegendElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LegendSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLegendSelfClose(HTMLParser.LegendSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code HeaderElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHeaderElement(HTMLParser.HeaderElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code HeaderSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHeaderSelfClose(HTMLParser.HeaderSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FooterElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFooterElement(HTMLParser.FooterElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FooterSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFooterSelfClose(HTMLParser.FooterSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NavElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNavElement(HTMLParser.NavElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NavSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNavSelfClose(HTMLParser.NavSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MainElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMainElement(HTMLParser.MainElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MainSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMainSelfClose(HTMLParser.MainSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SectionElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSectionElement(HTMLParser.SectionElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SectionSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSectionSelfClose(HTMLParser.SectionSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ArticleElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArticleElement(HTMLParser.ArticleElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ArticleSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArticleSelfClose(HTMLParser.ArticleSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AsideElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAsideElement(HTMLParser.AsideElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AsideSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAsideSelfClose(HTMLParser.AsideSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FigureElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFigureElement(HTMLParser.FigureElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FigureSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFigureSelfClose(HTMLParser.FigureSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FigcaptionElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFigcaptionElement(HTMLParser.FigcaptionElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code FigcaptionSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFigcaptionSelfClose(HTMLParser.FigcaptionSelfCloseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code StyleElementTag}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStyleElementTag(HTMLParser.StyleElementTagContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code GenericElement}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGenericElement(HTMLParser.GenericElementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code GenericSelfClose}
+	 * labeled alternative in {@link HTMLParser#htmlElement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGenericSelfClose(HTMLParser.GenericSelfCloseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link HTMLParser#htmlContent}.
 	 * @param ctx the parse tree
@@ -46,6 +950,12 @@ public interface HTMLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitHtmlAttribute(HTMLParser.HtmlAttributeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link HTMLParser#attributeName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAttributeName(HTMLParser.AttributeNameContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code dqJINJA}
 	 * labeled alternative in {@link HTMLParser#attrValue}.
@@ -376,11 +1286,19 @@ public interface HTMLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPassToCompareExpr(HTMLParser.PassToCompareExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link HTMLParser#compareExpr}.
+	 * Visit a parse tree produced by the {@code parenCompareExpr}
+	 * labeled alternative in {@link HTMLParser#compareExpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCompareExpr(HTMLParser.CompareExprContext ctx);
+	T visitParenCompareExpr(HTMLParser.ParenCompareExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code binaryCompareExpr}
+	 * labeled alternative in {@link HTMLParser#compareExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBinaryCompareExpr(HTMLParser.BinaryCompareExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code idLogic}
 	 * labeled alternative in {@link HTMLParser#logicalArg}.

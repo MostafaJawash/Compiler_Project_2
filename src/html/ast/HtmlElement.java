@@ -14,6 +14,18 @@ public class HtmlElement extends BaseAstNode {
         this.children = children;
     }
 
+    public String getTagName() {
+        return tagName;
+    }
+
+    public List<HtmlAttribute> getAttributes() {
+        return attributes;
+    }
+
+    public List<Node> getChildren() {
+        return children;
+    }
+
     @Override
     public String prettyPrint(int level) {
         StringBuilder sb = new StringBuilder();

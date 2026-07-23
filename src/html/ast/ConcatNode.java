@@ -10,6 +10,10 @@ public class ConcatNode extends BaseAstNode {
         this.parts = parts;
     }
 
+    public List<Node> getParts() {
+        return parts;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         StringBuilder sb = new StringBuilder();

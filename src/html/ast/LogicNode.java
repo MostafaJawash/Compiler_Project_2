@@ -10,6 +10,14 @@ public class LogicNode extends BaseAstNode {
         this.right = right;
     }
 
+    public Node getLeft() {
+        return left;
+    }
+
+    public Node getRight() {
+        return right;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         StringBuilder sb = new StringBuilder();

@@ -24,39 +24,33 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         return new Program(body, ctx.getStart().getLine());
     }
 
-    @Override
-    public Node visitHtmlElement(HTMLParser.HtmlElementContext ctx) {
-        if (ctx.styleElement() != null) return visit(ctx.styleElement());
+    /**
+     * Builds the HtmlElement AST node and its symbol-table entry for one concrete tag rule.
+     * Every visitXxxElement/visitXxxSelfClose override below calls this with its own tag name
+     * and symbol type/value known statically from the grammar rule that matched - no runtime
+     * tagName.equals(...) dispatch is involved.
+     */
+    private Node buildElement(String tagName, String symbolType, String symbolValue,
+                               List<HTMLParser.HtmlAttributeContext> attrCtxs,
+                               HTMLParser.HtmlContentContext contentCtx, int line) {
+        htmlST.addSymbol(tagName, symbolType, symbolValue, line);
 
-        String tagName = ctx.TAG_NAME(0).getText().toLowerCase();
-        int line = ctx.getStart().getLine();
-
-        if (tagName.equals("form")) {
-            htmlST.addSymbol(tagName, "Form_Structure", "Container", line);
-        } else if (tagName.equals("input")) {
-            htmlST.addSymbol(tagName, "Input_Field", "Interactive", line);
-        } else if (tagName.equals("textarea")) {
-            htmlST.addSymbol(tagName, "Text_Area", "Multi-line Input", line);
-        } else if (tagName.equals("button")) {
-            htmlST.addSymbol(tagName, "Button_Action", "Submit/Click", line);
-        } else if (tagName.equals("div")) {
-            htmlST.addSymbol(tagName, "Div_Block", "Layout Layout", line);
-        }
-
-        boolean hasAttributes = ctx.htmlAttribute() != null && !ctx.htmlAttribute().isEmpty();
-        boolean hasContent = ctx.htmlContent() != null && ctx.htmlContent().getChildCount() > 0;
+        boolean hasAttributes = attrCtxs != null && !attrCtxs.isEmpty();
+        boolean hasContent = contentCtx != null && contentCtx.getChildCount() > 0;
 
         List<HtmlAttribute> attributes = new ArrayList<>();
         List<Node> children = new ArrayList<>();
 
         if (hasAttributes || hasContent) {
             htmlST.pushScope("Tag_" + tagName);
-            attributes = ctx.htmlAttribute().stream()
-                    .map(a -> (HtmlAttribute) visit(a))
-                    .collect(Collectors.toList());
-            if (ctx.htmlContent() != null) {
-                for (int i = 0; i < ctx.htmlContent().getChildCount(); i++) {
-                    Node child = visit(ctx.htmlContent().getChild(i));
+            if (attrCtxs != null) {
+                attributes = attrCtxs.stream()
+                        .map(a -> (HtmlAttribute) visit(a))
+                        .collect(Collectors.toList());
+            }
+            if (contentCtx != null) {
+                for (int i = 0; i < contentCtx.getChildCount(); i++) {
+                    Node child = visit(contentCtx.getChild(i));
                     if (child != null) children.add(child);
                 }
             }
@@ -64,9 +58,665 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         }
         return new HtmlElement(tagName, attributes, children, line);
     }
+
+    @Override
+    public Node visitStyleElementTag(HTMLParser.StyleElementTagContext ctx) {
+        return visit(ctx.styleElement());
+    }
+
+    // Fallback for any tag not in the explicit standard-tag list above (FIX 1 keeps this as
+    // one alternative among many, not the sole rule driving htmlElement).
+    @Override
+    public Node visitGenericElement(HTMLParser.GenericElementContext ctx) {
+        String tagName = ctx.TAG_NAME(0).getText().toLowerCase();
+        return buildElement(tagName, "Html_Element", "Generic", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitGenericSelfClose(HTMLParser.GenericSelfCloseContext ctx) {
+        String tagName = ctx.TAG_NAME().getText().toLowerCase();
+        return buildElement(tagName, "Html_Element", "Generic", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    // ===== Explicit standard HTML tag rules (FIX 1) =====
+    @Override
+    public Node visitHtmlRootElement(HTMLParser.HtmlRootElementContext ctx) {
+        return buildElement("html", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitHtmlRootSelfClose(HTMLParser.HtmlRootSelfCloseContext ctx) {
+        return buildElement("html", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitHeadElement(HTMLParser.HeadElementContext ctx) {
+        return buildElement("head", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitHeadSelfClose(HTMLParser.HeadSelfCloseContext ctx) {
+        return buildElement("head", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBodyElement(HTMLParser.BodyElementContext ctx) {
+        return buildElement("body", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBodySelfClose(HTMLParser.BodySelfCloseContext ctx) {
+        return buildElement("body", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTitleElement(HTMLParser.TitleElementContext ctx) {
+        return buildElement("title", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTitleSelfClose(HTMLParser.TitleSelfCloseContext ctx) {
+        return buildElement("title", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitMetaElement(HTMLParser.MetaElementContext ctx) {
+        return buildElement("meta", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitLinkElement(HTMLParser.LinkElementContext ctx) {
+        return buildElement("link", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitScriptElement(HTMLParser.ScriptElementContext ctx) {
+        return buildElement("script", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitScriptSelfClose(HTMLParser.ScriptSelfCloseContext ctx) {
+        return buildElement("script", "Html_Element", "Doc_Structure", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH1Element(HTMLParser.H1ElementContext ctx) {
+        return buildElement("h1", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH1SelfClose(HTMLParser.H1SelfCloseContext ctx) {
+        return buildElement("h1", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH2Element(HTMLParser.H2ElementContext ctx) {
+        return buildElement("h2", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH2SelfClose(HTMLParser.H2SelfCloseContext ctx) {
+        return buildElement("h2", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH3Element(HTMLParser.H3ElementContext ctx) {
+        return buildElement("h3", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH3SelfClose(HTMLParser.H3SelfCloseContext ctx) {
+        return buildElement("h3", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH4Element(HTMLParser.H4ElementContext ctx) {
+        return buildElement("h4", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH4SelfClose(HTMLParser.H4SelfCloseContext ctx) {
+        return buildElement("h4", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH5Element(HTMLParser.H5ElementContext ctx) {
+        return buildElement("h5", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH5SelfClose(HTMLParser.H5SelfCloseContext ctx) {
+        return buildElement("h5", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH6Element(HTMLParser.H6ElementContext ctx) {
+        return buildElement("h6", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitH6SelfClose(HTMLParser.H6SelfCloseContext ctx) {
+        return buildElement("h6", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitPElement(HTMLParser.PElementContext ctx) {
+        return buildElement("p", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitPSelfClose(HTMLParser.PSelfCloseContext ctx) {
+        return buildElement("p", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSpanElement(HTMLParser.SpanElementContext ctx) {
+        return buildElement("span", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSpanSelfClose(HTMLParser.SpanSelfCloseContext ctx) {
+        return buildElement("span", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDivElement(HTMLParser.DivElementContext ctx) {
+        return buildElement("div", "Div_Block", "Layout Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDivSelfClose(HTMLParser.DivSelfCloseContext ctx) {
+        return buildElement("div", "Div_Block", "Layout Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBrElement(HTMLParser.BrElementContext ctx) {
+        return buildElement("br", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitHrElement(HTMLParser.HrElementContext ctx) {
+        return buildElement("hr", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitPreElement(HTMLParser.PreElementContext ctx) {
+        return buildElement("pre", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitPreSelfClose(HTMLParser.PreSelfCloseContext ctx) {
+        return buildElement("pre", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBlockquoteElement(HTMLParser.BlockquoteElementContext ctx) {
+        return buildElement("blockquote", "Html_Element", "Text_Content", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBlockquoteSelfClose(HTMLParser.BlockquoteSelfCloseContext ctx) {
+        return buildElement("blockquote", "Html_Element", "Text_Content", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBElement(HTMLParser.BElementContext ctx) {
+        return buildElement("b", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBSelfClose(HTMLParser.BSelfCloseContext ctx) {
+        return buildElement("b", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitStrongElement(HTMLParser.StrongElementContext ctx) {
+        return buildElement("strong", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitStrongSelfClose(HTMLParser.StrongSelfCloseContext ctx) {
+        return buildElement("strong", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIElement(HTMLParser.IElementContext ctx) {
+        return buildElement("i", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitISelfClose(HTMLParser.ISelfCloseContext ctx) {
+        return buildElement("i", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitEmElement(HTMLParser.EmElementContext ctx) {
+        return buildElement("em", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitEmSelfClose(HTMLParser.EmSelfCloseContext ctx) {
+        return buildElement("em", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitUElement(HTMLParser.UElementContext ctx) {
+        return buildElement("u", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitUSelfClose(HTMLParser.USelfCloseContext ctx) {
+        return buildElement("u", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSmallElement(HTMLParser.SmallElementContext ctx) {
+        return buildElement("small", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSmallSelfClose(HTMLParser.SmallSelfCloseContext ctx) {
+        return buildElement("small", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitMarkElement(HTMLParser.MarkElementContext ctx) {
+        return buildElement("mark", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitMarkSelfClose(HTMLParser.MarkSelfCloseContext ctx) {
+        return buildElement("mark", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSubElement(HTMLParser.SubElementContext ctx) {
+        return buildElement("sub", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSubSelfClose(HTMLParser.SubSelfCloseContext ctx) {
+        return buildElement("sub", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSupElement(HTMLParser.SupElementContext ctx) {
+        return buildElement("sup", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSupSelfClose(HTMLParser.SupSelfCloseContext ctx) {
+        return buildElement("sup", "Html_Element", "Text_Formatting", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitUlElement(HTMLParser.UlElementContext ctx) {
+        return buildElement("ul", "Html_Element", "List", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitUlSelfClose(HTMLParser.UlSelfCloseContext ctx) {
+        return buildElement("ul", "Html_Element", "List", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitOlElement(HTMLParser.OlElementContext ctx) {
+        return buildElement("ol", "Html_Element", "List", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitOlSelfClose(HTMLParser.OlSelfCloseContext ctx) {
+        return buildElement("ol", "Html_Element", "List", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitLiElement(HTMLParser.LiElementContext ctx) {
+        return buildElement("li", "Html_Element", "List", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitLiSelfClose(HTMLParser.LiSelfCloseContext ctx) {
+        return buildElement("li", "Html_Element", "List", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDlElement(HTMLParser.DlElementContext ctx) {
+        return buildElement("dl", "Html_Element", "List", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDlSelfClose(HTMLParser.DlSelfCloseContext ctx) {
+        return buildElement("dl", "Html_Element", "List", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDtElement(HTMLParser.DtElementContext ctx) {
+        return buildElement("dt", "Html_Element", "List", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDtSelfClose(HTMLParser.DtSelfCloseContext ctx) {
+        return buildElement("dt", "Html_Element", "List", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDdElement(HTMLParser.DdElementContext ctx) {
+        return buildElement("dd", "Html_Element", "List", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitDdSelfClose(HTMLParser.DdSelfCloseContext ctx) {
+        return buildElement("dd", "Html_Element", "List", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitAElement(HTMLParser.AElementContext ctx) {
+        return buildElement("a", "Html_Element", "Link_Media", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitASelfClose(HTMLParser.ASelfCloseContext ctx) {
+        return buildElement("a", "Html_Element", "Link_Media", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitImgElement(HTMLParser.ImgElementContext ctx) {
+        return buildElement("img", "Html_Element", "Link_Media", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitAudioElement(HTMLParser.AudioElementContext ctx) {
+        return buildElement("audio", "Html_Element", "Link_Media", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitAudioSelfClose(HTMLParser.AudioSelfCloseContext ctx) {
+        return buildElement("audio", "Html_Element", "Link_Media", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitVideoElement(HTMLParser.VideoElementContext ctx) {
+        return buildElement("video", "Html_Element", "Link_Media", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitVideoSelfClose(HTMLParser.VideoSelfCloseContext ctx) {
+        return buildElement("video", "Html_Element", "Link_Media", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSourceElement(HTMLParser.SourceElementContext ctx) {
+        return buildElement("source", "Html_Element", "Link_Media", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIframeElement(HTMLParser.IframeElementContext ctx) {
+        return buildElement("iframe", "Html_Element", "Link_Media", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitIframeSelfClose(HTMLParser.IframeSelfCloseContext ctx) {
+        return buildElement("iframe", "Html_Element", "Link_Media", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTableElement(HTMLParser.TableElementContext ctx) {
+        return buildElement("table", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTableSelfClose(HTMLParser.TableSelfCloseContext ctx) {
+        return buildElement("table", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTheadElement(HTMLParser.TheadElementContext ctx) {
+        return buildElement("thead", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTheadSelfClose(HTMLParser.TheadSelfCloseContext ctx) {
+        return buildElement("thead", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTbodyElement(HTMLParser.TbodyElementContext ctx) {
+        return buildElement("tbody", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTbodySelfClose(HTMLParser.TbodySelfCloseContext ctx) {
+        return buildElement("tbody", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTfootElement(HTMLParser.TfootElementContext ctx) {
+        return buildElement("tfoot", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTfootSelfClose(HTMLParser.TfootSelfCloseContext ctx) {
+        return buildElement("tfoot", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTrElement(HTMLParser.TrElementContext ctx) {
+        return buildElement("tr", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTrSelfClose(HTMLParser.TrSelfCloseContext ctx) {
+        return buildElement("tr", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitThElement(HTMLParser.ThElementContext ctx) {
+        return buildElement("th", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitThSelfClose(HTMLParser.ThSelfCloseContext ctx) {
+        return buildElement("th", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTdElement(HTMLParser.TdElementContext ctx) {
+        return buildElement("td", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTdSelfClose(HTMLParser.TdSelfCloseContext ctx) {
+        return buildElement("td", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitCaptionElement(HTMLParser.CaptionElementContext ctx) {
+        return buildElement("caption", "Html_Element", "Table", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitCaptionSelfClose(HTMLParser.CaptionSelfCloseContext ctx) {
+        return buildElement("caption", "Html_Element", "Table", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFormElement(HTMLParser.FormElementContext ctx) {
+        return buildElement("form", "Form_Structure", "Container", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFormSelfClose(HTMLParser.FormSelfCloseContext ctx) {
+        return buildElement("form", "Form_Structure", "Container", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitInputElement(HTMLParser.InputElementContext ctx) {
+        return buildElement("input", "Input_Field", "Interactive", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitButtonElement(HTMLParser.ButtonElementContext ctx) {
+        return buildElement("button", "Button_Action", "Submit/Click", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitButtonSelfClose(HTMLParser.ButtonSelfCloseContext ctx) {
+        return buildElement("button", "Button_Action", "Submit/Click", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSelectElement(HTMLParser.SelectElementContext ctx) {
+        return buildElement("select", "Html_Element", "Form", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSelectSelfClose(HTMLParser.SelectSelfCloseContext ctx) {
+        return buildElement("select", "Html_Element", "Form", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitOptionElement(HTMLParser.OptionElementContext ctx) {
+        return buildElement("option", "Html_Element", "Form", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitOptionSelfClose(HTMLParser.OptionSelfCloseContext ctx) {
+        return buildElement("option", "Html_Element", "Form", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTextareaElement(HTMLParser.TextareaElementContext ctx) {
+        return buildElement("textarea", "Text_Area", "Multi-line Input", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitTextareaSelfClose(HTMLParser.TextareaSelfCloseContext ctx) {
+        return buildElement("textarea", "Text_Area", "Multi-line Input", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitLabelElement(HTMLParser.LabelElementContext ctx) {
+        return buildElement("label", "Html_Element", "Form", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitLabelSelfClose(HTMLParser.LabelSelfCloseContext ctx) {
+        return buildElement("label", "Html_Element", "Form", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFieldsetElement(HTMLParser.FieldsetElementContext ctx) {
+        return buildElement("fieldset", "Html_Element", "Form", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFieldsetSelfClose(HTMLParser.FieldsetSelfCloseContext ctx) {
+        return buildElement("fieldset", "Html_Element", "Form", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitLegendElement(HTMLParser.LegendElementContext ctx) {
+        return buildElement("legend", "Html_Element", "Form", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitLegendSelfClose(HTMLParser.LegendSelfCloseContext ctx) {
+        return buildElement("legend", "Html_Element", "Form", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitHeaderElement(HTMLParser.HeaderElementContext ctx) {
+        return buildElement("header", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitHeaderSelfClose(HTMLParser.HeaderSelfCloseContext ctx) {
+        return buildElement("header", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFooterElement(HTMLParser.FooterElementContext ctx) {
+        return buildElement("footer", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFooterSelfClose(HTMLParser.FooterSelfCloseContext ctx) {
+        return buildElement("footer", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitNavElement(HTMLParser.NavElementContext ctx) {
+        return buildElement("nav", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitNavSelfClose(HTMLParser.NavSelfCloseContext ctx) {
+        return buildElement("nav", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitMainElement(HTMLParser.MainElementContext ctx) {
+        return buildElement("main", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitMainSelfClose(HTMLParser.MainSelfCloseContext ctx) {
+        return buildElement("main", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSectionElement(HTMLParser.SectionElementContext ctx) {
+        return buildElement("section", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitSectionSelfClose(HTMLParser.SectionSelfCloseContext ctx) {
+        return buildElement("section", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitArticleElement(HTMLParser.ArticleElementContext ctx) {
+        return buildElement("article", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitArticleSelfClose(HTMLParser.ArticleSelfCloseContext ctx) {
+        return buildElement("article", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitAsideElement(HTMLParser.AsideElementContext ctx) {
+        return buildElement("aside", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitAsideSelfClose(HTMLParser.AsideSelfCloseContext ctx) {
+        return buildElement("aside", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFigureElement(HTMLParser.FigureElementContext ctx) {
+        return buildElement("figure", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFigureSelfClose(HTMLParser.FigureSelfCloseContext ctx) {
+        return buildElement("figure", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFigcaptionElement(HTMLParser.FigcaptionElementContext ctx) {
+        return buildElement("figcaption", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), ctx.htmlContent(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitFigcaptionSelfClose(HTMLParser.FigcaptionSelfCloseContext ctx) {
+        return buildElement("figcaption", "Html_Element", "Semantic_Layout", ctx.htmlAttribute(), null, ctx.getStart().getLine());
+    }
+
     @Override
     public Node visitHtmlAttribute(HTMLParser.HtmlAttributeContext ctx) {
-        String name = ctx.TAG_NAME() != null ? ctx.TAG_NAME().getText() : "";
+        String name = ctx.attributeName() != null ? ctx.attributeName().getText() : "";
         int line = ctx.getStart().getLine();
         String rawValue = ctx.attrValue() != null ? ctx.attrValue().getText().replaceAll("^['\"]|['\"]$", "") : "true";
         htmlST.addSymbol(name, "Attribute", rawValue, line);
@@ -99,6 +749,19 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     @Override
     public Node visitJinjaVariableTemplate(HTMLParser.JinjaVariableTemplateContext ctx) {
         return visit(ctx.variable());
+    }
+
+    @Override
+    public Node visitVariable(HTMLParser.VariableContext ctx) {
+        // variable has no labeled alternatives, so ANTLR's default visitChildren would visit
+        // VARIABLE_START, the expression, then VARIABLE_END and keep only the LAST result -
+        // which is null (VARIABLE_END isn't a TEXT token). Dispatch to the actual expression
+        // explicitly so {{ ... }} content is not silently dropped from the AST.
+        if (ctx.expr() != null) return visit(ctx.expr());
+        if (ctx.exprMath() != null) return visit(ctx.exprMath());
+        if (ctx.funCall() != null) return visit(ctx.funCall());
+        if (ctx.exprLogic() != null) return visit(ctx.exprLogic());
+        return new TextNode("", ctx.getStart().getLine());
     }
 
     @Override
@@ -411,6 +1074,52 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     @Override
     public Node visitPassToCompareExpr(HTMLParser.PassToCompareExprContext ctx) {
         return visit(ctx.compareExpr());
+    }
+
+    @Override
+    public Node visitParenCompareExpr(HTMLParser.ParenCompareExprContext ctx) {
+        return visit(ctx.exprLogic());
+    }
+
+    @Override
+    public Node visitBinaryCompareExpr(HTMLParser.BinaryCompareExprContext ctx) {
+        Node left = visit(ctx.logicalArg(0));
+        if (ctx.OPERATOR() != null) {
+            Node right = visit(ctx.logicalArg(1));
+            return new LogicNode(left, right, ctx.getStart().getLine());
+        }
+        return left;
+    }
+
+    @Override
+    public Node visitIdLogic(HTMLParser.IdLogicContext ctx) {
+        return buildIdentifier(ctx.IDENTIFIER(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitStrLogic(HTMLParser.StrLogicContext ctx) {
+        String text = ctx.STRING().getText().replaceAll("^['\"]|['\"]$", "");
+        return new TextNode(text, ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitNumberLogic(HTMLParser.NumberLogicContext ctx) {
+        return new NumberNode(Integer.parseInt(ctx.NUMBER().getText()), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitBoolLogic(HTMLParser.BoolLogicContext ctx) {
+        return new TextNode(ctx.getText(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitNoneLogic(HTMLParser.NoneLogicContext ctx) {
+        return new TextNode("None", ctx.getStart().getLine());
+    }
+
+    @Override
+    public Node visitExprMathLogic(HTMLParser.ExprMathLogicContext ctx) {
+        return visit(ctx.exprMath());
     }
 
     @Override

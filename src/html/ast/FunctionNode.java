@@ -12,6 +12,14 @@ public class FunctionNode extends BaseAstNode {
         this.arguments = arguments;
     }
 
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    public List<Node> getArguments() {
+        return arguments;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         String pad = indent(indent);

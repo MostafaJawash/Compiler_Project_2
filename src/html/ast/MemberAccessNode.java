@@ -10,6 +10,14 @@ public class MemberAccessNode extends BaseAstNode {
         this.field = field;
     }
 
+    public Node getTarget() {
+        return target;
+    }
+
+    public String getField() {
+        return field;
+    }
+
     @Override
     public String prettyPrint(int level) {
         StringBuilder sb = new StringBuilder();

@@ -14,6 +14,18 @@ public class JinjaForBlock extends BaseAstNode {
         this.body = body;
     }
 
+    public List<String> getVariables() {
+        return variables;
+    }
+
+    public Node getIterable() {
+        return iterable;
+    }
+
+    public List<Node> getBody() {
+        return body;
+    }
+
     @Override
     public String prettyPrint(int level) {
         StringBuilder sb = new StringBuilder();
