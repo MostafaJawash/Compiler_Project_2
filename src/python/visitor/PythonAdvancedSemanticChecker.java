@@ -313,8 +313,14 @@ public class PythonAdvancedSemanticChecker {
         if (args == null) return;
         for (Pair<Expr, Expr> arg : args) {
             if (arg == null) continue;
-            if (arg.first != null) inferType(arg.first, scope);
-            if (arg.second != null) inferType(arg.second, scope);
+            if (arg.second != null) {
+                // arg.first is the keyword name (e.g. `message=` in message="..."), not a value
+                // reference - only the actual value (arg.second) should be analyzed.
+                inferType(arg.second, scope);
+            } else if (arg.first != null) {
+                // Positional argument: arg.first is the real value expression.
+                inferType(arg.first, scope);
+            }
         }
     }
 

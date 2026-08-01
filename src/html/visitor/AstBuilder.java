@@ -921,6 +921,19 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 if (child != null) body.add(child);
             }
         }
+        List<JinjaIfBlock.ElifBranch> elifBranches = new ArrayList<>();
+        for (var elifCtx : ifStmt.elifStm()) {
+            Node elifCondition = visit(elifCtx.getChild(2));
+            if (elifCondition == null) elifCondition = new TextNode("true", elifCtx.getStart().getLine());
+            List<Node> elifBody = new ArrayList<>();
+            if (elifCtx.htmlContent() != null) {
+                for (int i = 0; i < elifCtx.htmlContent().getChildCount(); i++) {
+                    Node child = visit(elifCtx.htmlContent().getChild(i));
+                    if (child != null) elifBody.add(child);
+                }
+            }
+            elifBranches.add(new JinjaIfBlock.ElifBranch(elifCondition, elifBody));
+        }
         List<Node> elseBody = new ArrayList<>();
         if (ifStmt.elseStm() != null && ifStmt.elseStm().htmlContent() != null) {
             for (int i = 0; i < ifStmt.elseStm().htmlContent().getChildCount(); i++) {
@@ -928,7 +941,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
                 if (child != null) elseBody.add(child);
             }
         }
-        return new JinjaIfBlock(condition, body, elseBody, line);
+        return new JinjaIfBlock(condition, body, elifBranches, elseBody, line);
     }
 
 
@@ -1046,7 +1059,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         // تم تصحيح جلب العناصر المتوافقة مع الـ Context الحالي لديكِ لمنع الخطأ
         Node left = visit(ctx.getChild(0));
         Node right = visit(ctx.getChild(2));
-        return new LogicNode(left, right, ctx.getStart().getLine());
+        return new LogicNode(left, right, LogicNode.LogicOp.OR, ctx.getStart().getLine());
     }
 
     @Override
@@ -1058,7 +1071,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         // تم تصحيح جلب العناصر المتوافقة مع الـ Context الحالي لديكِ لمنع الخطأ
         Node left = visit(ctx.getChild(0));
         Node right = visit(ctx.getChild(2));
-        return new LogicNode(left, right, ctx.getStart().getLine());
+        return new LogicNode(left, right, LogicNode.LogicOp.AND, ctx.getStart().getLine());
     }
 
     @Override
@@ -1069,7 +1082,7 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
     public Node visitUnaryNotExpr(HTMLParser.UnaryNotExprContext ctx) {
         // تم تصحيح جلب العناصر المتوافقة مع الـ Context الحالي لديكِ لمنع الخطأ
         Node expression = visit(ctx.getChild(1));
-        return new LogicNode(expression, null, ctx.getStart().getLine());
+        return new LogicNode(expression, null, LogicNode.LogicOp.NOT, ctx.getStart().getLine());
     }
     @Override
     public Node visitPassToCompareExpr(HTMLParser.PassToCompareExprContext ctx) {
@@ -1086,7 +1099,16 @@ public class AstBuilder extends HTMLParserBaseVisitor<Node> {
         Node left = visit(ctx.logicalArg(0));
         if (ctx.OPERATOR() != null) {
             Node right = visit(ctx.logicalArg(1));
-            return new LogicNode(left, right, ctx.getStart().getLine());
+            LogicNode.LogicOp op = switch (ctx.OPERATOR().getText()) {
+                case "==" -> LogicNode.LogicOp.EQ;
+                case "!=" -> LogicNode.LogicOp.NEQ;
+                case ">" -> LogicNode.LogicOp.GT;
+                case ">=" -> LogicNode.LogicOp.GTE;
+                case "<" -> LogicNode.LogicOp.LT;
+                case "<=" -> LogicNode.LogicOp.LTE;
+                default -> throw new IllegalStateException("Unknown comparison operator token: " + ctx.OPERATOR().getText());
+            };
+            return new LogicNode(left, right, op, ctx.getStart().getLine());
         }
         return left;
     }
