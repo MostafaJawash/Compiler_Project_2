@@ -1,3 +1,4 @@
+import generation.SemanticReportBuilder;
 import python.ast.Program;
 import python.visitor.PythonAdvancedSemanticChecker;
 import python.visitor.visitorAst;
@@ -17,7 +18,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 public class Main {
     private static final boolean SHOW_PARSE_TREE = true;
@@ -93,33 +93,7 @@ public class Main {
 
     private static void printUnifiedSemanticReport(PythonAdvancedSemanticChecker pythonChecker,
                                                    HtmlJinjaCssSemanticChecker htmlChecker) {
-        System.out.println("\n------------------------------------------------------------");
-        System.out.println("              UNIFIED SEMANTIC ERRORS REPORT                ");
-        System.out.println("------------------------------------------------------------");
-
-        int total = 0;
-        total += printCategory("Category 1", "Undefined Variable Errors", pythonChecker.getUndefinedVariableErrors());
-        total += printCategory("Category 2", "Type Errors", pythonChecker.getTypeErrors());
-        total += printCategory("Category 3", "Scope Errors", pythonChecker.getScopeErrors());
-        total += printCategory("Category 4", "Type Mismatch Errors", pythonChecker.getTypeMismatchErrors());
-        total += printCategory("Category 5", "Missing Flask Variable Errors", htmlChecker.getMissingFlaskVariableErrors());
-        total += printCategory("Category 6", "HTML/Jinja Scope Errors", htmlChecker.getScopeErrors());
-
-        System.out.println("\n[Analysis Summary]: " + (total == 0 ? "✔ PASSED" : "❌ FAILED (" + total + " Errors)"));
-        System.out.println("------------------------------------------------------------\n");
-    }
-
-    private static int printCategory(String title, String subtitle, List<String> errors) {
-        System.out.println("▶ [" + title + "] " + subtitle + ":");
-        if (errors == null || errors.isEmpty()) {
-            System.out.println("............................................................");
-            return 0;
-        }
-        for (String err : errors) {
-            System.out.println("   ❌ " + err);
-        }
-        System.out.println("............................................................");
-        return errors.size();
+        System.out.print(SemanticReportBuilder.build(pythonChecker, htmlChecker));
     }
 
     private static void showParseTree(String code, ParseTree parseTree, Parser parser) {
