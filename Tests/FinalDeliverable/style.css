@@ -1,0 +1,38 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #222;
+}
+
+h1 {
+    color: #333;
+}
+
+.products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    width: 220px;
+}
+
+.price.premium {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.price.standard {
+    color: #2980b9;
+}
+
+.price.budget {
+    color: #27ae60;
+}

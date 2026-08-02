@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Product List</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<h1>Our Products</h1>
+<div class="products">
+    {% for product in products %}
+    <div class="product-card">
+        <h3>{{ product.name }}</h3>
+        {% if product.price >= 500 %}
+        <p class="price premium">${{ product.price }} - Premium</p>
+        {% elif product.price >= 100 %}
+        <p class="price standard">${{ product.price }} - Standard</p>
+        {% else %}
+        <p class="price budget">${{ product.price }} - Budget</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+<a href="/add">Add a new product</a>
+</body>
+</html>

@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Phase 2 / Step 3: the final generation orchestrator. Runs, in order:
@@ -109,12 +111,21 @@ public class GenerationPipeline {
 
                 Path templateSource = templatesDir.resolve(context.getTemplateName());
                 String jinjaCode = Files.readString(templateSource, StandardCharsets.UTF_8);
-                Node jinjaAst = parseTemplateFragment(jinjaCode);
+
+                // htmlContent() (used by parseTemplateFragment below) has no doctype
+                // alternative - a leading "<!DOCTYPE html>" (present in almost every real
+                // template) would otherwise stop the parse immediately and silently yield
+                // an empty AST. Strip it before parsing and re-prepend it verbatim to the
+                // rendered output instead.
+                String doctypePrefix = extractLeadingDoctype(jinjaCode);
+                String fragmentCode = jinjaCode.substring(doctypePrefix.length());
+
+                Node jinjaAst = parseTemplateFragment(fragmentCode);
                 jinjaAstsByTemplate.put(context.getTemplateName(), jinjaAst);
 
                 htmlChecker.checkTemplate(context.getTemplateName(), jinjaAst);
 
-                String html = renderer.render(jinjaAst, context);
+                String html = doctypePrefix + renderer.render(jinjaAst, context);
                 Path outPath = outputDir.resolve(toHtmlFileName(context.getTemplateName()));
                 try {
                     Files.writeString(outPath, html, StandardCharsets.UTF_8);
@@ -187,6 +198,15 @@ public class GenerationPipeline {
             log.supportFileCopied(source, dest, false, e.getMessage());
             throw new RuntimeException("Failed to copy support file " + source + ": " + e.getMessage(), e);
         }
+    }
+
+    private static final Pattern LEADING_DOCTYPE = Pattern.compile("^\\s*<!\\s*[dD][oO][cC][tT][yY][pP][eE]\\s+html\\s*>");
+
+    /** Returns the exact leading "<!DOCTYPE html>" text (grammar's doctype rule is case-insensitive
+     *  on DOCTYPE, exact-case on html) if present, otherwise "". */
+    private static String extractLeadingDoctype(String code) {
+        Matcher m = LEADING_DOCTYPE.matcher(code);
+        return m.find() ? m.group() : "";
     }
 
     /** ".jinja"/".html"/anything -> same base name with a ".html" extension. */
