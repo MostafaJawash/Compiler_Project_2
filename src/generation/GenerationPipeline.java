@@ -51,11 +51,23 @@ public class GenerationPipeline {
 
     private final Path outputDir;
     private final Path compilerOutputDir;
+    private final boolean injectLiveReload;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public GenerationPipeline(Path baseDir) {
+        this(baseDir, false);
+    }
+
+    /**
+     * @param injectLiveReload when true, every rendered page gets a small polling script
+     *                         (see {@link #injectLiveReloadScript}) injected before its
+     *                         closing body tag; used only by dev mode (DevMode.java), so a
+     *                         plain one-off run() call outside dev mode stays unpolluted.
+     */
+    public GenerationPipeline(Path baseDir, boolean injectLiveReload) {
         this.outputDir = baseDir.resolve("output");
         this.compilerOutputDir = baseDir.resolve("compiler_output");
+        this.injectLiveReload = injectLiveReload;
     }
 
     public static final class Result {
@@ -126,6 +138,9 @@ public class GenerationPipeline {
                 htmlChecker.checkTemplate(context.getTemplateName(), jinjaAst);
 
                 String html = doctypePrefix + renderer.render(jinjaAst, context);
+                if (injectLiveReload) {
+                    html = injectLiveReloadScript(html);
+                }
                 Path outPath = outputDir.resolve(toHtmlFileName(context.getTemplateName()));
                 try {
                     Files.writeString(outPath, html, StandardCharsets.UTF_8);
@@ -198,6 +213,35 @@ public class GenerationPipeline {
             log.supportFileCopied(source, dest, false, e.getMessage());
             throw new RuntimeException("Failed to copy support file " + source + ": " + e.getMessage(), e);
         }
+    }
+
+    /** Polls /__version (served by DevServer) and reloads the page once the value changes -
+     *  i.e. once AutoRegenerator has produced a new build. Wrapped in try/catch per fetch so a
+     *  server that's momentarily down mid-regeneration doesn't throw in the browser console. */
+    private static final String LIVE_RELOAD_SCRIPT =
+            "<script>(function(){\n" +
+            "  var lastVersion = null;\n" +
+            "  function poll(){\n" +
+            "    try {\n" +
+            "      fetch('/__version', {cache: 'no-store'}).then(function(r){ return r.text(); }).then(function(v){\n" +
+            "        if (lastVersion === null) { lastVersion = v; return; }\n" +
+            "        if (v !== lastVersion) { location.reload(); }\n" +
+            "      }).catch(function(){});\n" +
+            "    } catch (e) {}\n" +
+            "  }\n" +
+            "  poll();\n" +
+            "  setInterval(poll, 1000);\n" +
+            "})();</script>";
+
+    /** Inserts LIVE_RELOAD_SCRIPT just before the closing "</body>" tag (case-insensitive
+     *  search, since the surrounding text is ASCII so the match index is valid for either
+     *  case), or appends it at the end if the fragment has no body tag at all. */
+    private static String injectLiveReloadScript(String html) {
+        int idx = html.toLowerCase().lastIndexOf("</body>");
+        if (idx < 0) {
+            return html + LIVE_RELOAD_SCRIPT;
+        }
+        return html.substring(0, idx) + LIVE_RELOAD_SCRIPT + html.substring(idx);
     }
 
     private static final Pattern LEADING_DOCTYPE = Pattern.compile("^\\s*<!\\s*[dD][oO][cC][tT][yY][pP][eE]\\s+html\\s*>");
