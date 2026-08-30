@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="description" content="Full product details."/>
+    <title>Product Details</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body id="page-product-detail">
+<a class="back-icon" href="index.html" title="Back to product list">&#8592;</a>
+<header class="site-header">
+    <h1>Product Details</h1>
+    <p class="tagline">Everything you need to know before you buy.</p>
+</header>
+<main>
+    <article class="detail-card" pid="{{ product.id }}">
+        <img class="detail-image" src="{{ product.image_path }}" alt="{{ product.name }}"/>
+        <div class="detail-info">
+            <h2>{{ product.name }}</h2>
+            <p class="description">{{ product.description }}</p>
+            {% if product.price >= 500 %}
+            <p class="price premium">${{ product.price }} - Premium</p>
+            {% elif product.price >= 100 %}
+            <p class="price standard">${{ product.price }} - Standard</p>
+            {% else %}
+            <p class="price budget">${{ product.price }} - Budget</p>
+            {% endif %}
+            <div class="detail-actions">
+                <a class="btn btn-primary" href="{{ product.edit_page }}">Edit Product</a>
+            </div>
+            <div class="danger-zone">
+                <a class="btn btn-danger" href="#confirm-delete">Delete Product</a>
+                <div id="confirm-delete" class="delete-confirm">
+                    <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+                    <a class="btn btn-danger" href="index.html">Yes, delete it</a>
+                    <a class="btn btn-secondary" href="#">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </article>
+</main>
+<footer class="site-footer">
+    <p>&#169; 2026 Product Store. All rights reserved.</p>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
