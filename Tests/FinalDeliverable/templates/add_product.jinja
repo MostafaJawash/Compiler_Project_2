@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="description" content="Add a new product to the catalog."/>
+    <title>Add Product</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body id="page-add-product">
+<header class="site-header">
+    <h1>Add a New Product</h1>
+    <p class="tagline">Fill in the details below to list a new item.</p>
+</header>
+<main>
+    <form class="form-card" method="POST">
+        <fieldset>
+            <legend>Product Details</legend>
+            <label>Name:</label>
+            <input type="text" name="name" placeholder="e.g. Wireless Mouse" required/>
+            <label>Description:</label>
+            <textarea name="description" rows="3" placeholder="A short description of the product"></textarea>
+            <label>Price:</label>
+            <input type="text" name="price" placeholder="e.g. 49.99" required/>
+            <label>Product Image:</label>
+            <input type="file" name="image" accept="image/*"/>
+        </fieldset>
+        <button type="submit">Save</button>
+    </form>
+    <div class="actions-bar">
+        <a class="btn btn-secondary" href="index.html">Back to product list</a>
+    </div>
+</main>
+<footer class="site-footer">
+    <p>&#169; 2026 Product Store. All rights reserved.</p>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>

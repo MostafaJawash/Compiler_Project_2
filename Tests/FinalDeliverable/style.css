@@ -1,0 +1,450 @@
+:root {
+    --color-bg: #f4f6f8;
+    --color-surface: #ffffff;
+    --color-text: #1f2430;
+    --color-text-muted: #5b6472;
+    --color-border: #e2e6ea;
+    --color-primary: #6d5dfc;
+    --color-primary-dark: #5647d9;
+    --color-accent: #17c3b2;
+
+    --gradient-brand: linear-gradient(135deg, #6d5dfc 0%, #17c3b2 100%);
+    --gradient-bg: linear-gradient(160deg, #eef1ff 0%, #e6faf6 45%, #fff6e8 100%);
+
+    --color-premium-bg: #e74c3c;
+    --color-premium-text: #ffffff;
+    --color-standard-bg: #2f80ed;
+    --color-standard-text: #ffffff;
+    --color-budget-bg: #16a085;
+    --color-budget-text: #ffffff;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(30, 20, 60, 0.10);
+    --shadow-md: 0 12px 28px rgba(30, 20, 60, 0.16);
+    --shadow-glow: 0 8px 20px rgba(109, 93, 252, 0.35);
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 40px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--gradient-bg);
+    background-attachment: fixed;
+    color: var(--color-text);
+    line-height: 1.55;
+}
+
+h1, h2, h3, h4 {
+    margin: 0 0 var(--space-2) 0;
+    color: var(--color-text);
+    line-height: 1.25;
+}
+
+p {
+    margin: 0 0 var(--space-2) 0;
+}
+
+a {
+    color: var(--color-primary);
+}
+
+/* ---------- Layout shell ---------- */
+
+@keyframes headerIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.site-header {
+    background: var(--gradient-brand);
+    padding: var(--space-4) var(--space-5);
+    box-shadow: var(--shadow-md);
+    animation: headerIn 0.5s ease both;
+}
+
+.site-header h1 {
+    color: #ffffff;
+    font-size: 2rem;
+}
+
+.site-header .tagline {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1rem;
+}
+
+main {
+    display: block;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--space-5);
+}
+
+.site-footer {
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* ---------- Back-to-list corner icon (product detail pages) ---------- */
+
+.back-icon {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 30;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    font-size: 1.4rem;
+    text-decoration: none;
+    box-shadow: var(--shadow-md);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.back-icon:hover {
+    background: var(--gradient-brand);
+    color: #ffffff;
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Room for the fixed back-icon so it doesn't sit on top of the header text */
+#page-product-detail .site-header {
+    padding-left: 84px;
+}
+
+/* ---------- Buttons and links ---------- */
+
+.btn {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: bold;
+    border: 1px solid transparent;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-primary {
+    background: var(--gradient-brand);
+    color: var(--color-surface);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-primary);
+    color: var(--color-surface);
+    transform: translateY(-2px);
+}
+
+.actions-bar {
+    margin-top: var(--space-4);
+    text-align: center;
+}
+
+/* ---------- Product grid ---------- */
+
+.products-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-3);
+}
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.product-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: cardIn 0.5s ease both;
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.product-card:nth-child(1) { animation-delay: 0.05s; }
+.product-card:nth-child(2) { animation-delay: 0.10s; }
+.product-card:nth-child(3) { animation-delay: 0.15s; }
+.product-card:nth-child(4) { animation-delay: 0.20s; }
+.product-card:nth-child(5) { animation-delay: 0.25s; }
+.product-card:nth-child(6) { animation-delay: 0.30s; }
+.product-card:nth-child(7) { animation-delay: 0.35s; }
+.product-card:nth-child(8) { animation-delay: 0.40s; }
+
+.product-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-6px) scale(1.015);
+    border-color: var(--color-accent);
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.04);
+}
+
+.product-card:hover .price {
+    transform: scale(1.05);
+}
+
+.product-card h3 {
+    font-size: 1.1rem;
+}
+
+.product-card .description {
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    min-height: 2.6em;
+}
+
+.product-image {
+    display: block;
+    width: 100%;
+    height: 170px;
+    object-fit: contain;
+    background-color: #eef1f4;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    transition: transform 0.3s ease;
+}
+
+.price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.price-row .price {
+    margin-top: 0;
+}
+
+.btn-small {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+}
+
+.price {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    border-radius: 999px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    transition: transform 0.2s ease;
+}
+
+.price.premium {
+    background-color: var(--color-premium-bg);
+    color: var(--color-premium-text);
+}
+
+.price.standard {
+    background-color: var(--color-standard-bg);
+    color: var(--color-standard-text);
+}
+
+.price.budget {
+    background-color: var(--color-budget-bg);
+    color: var(--color-budget-text);
+}
+
+/* ---------- Forms (add / edit product) ---------- */
+
+.form-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 var(--space-3) 0;
+}
+
+legend {
+    font-weight: bold;
+    font-size: 1.05rem;
+    margin-bottom: var(--space-3);
+    padding: 0;
+}
+
+label {
+    display: block;
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-1);
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background-color: var(--color-surface);
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: var(--space-2) 0;
+}
+
+button[type="submit"] {
+    display: inline-block;
+    margin-top: var(--space-4);
+    padding: var(--space-2) var(--space-4);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--gradient-brand);
+    color: var(--color-surface);
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.summary-card {
+    max-width: 480px;
+    margin: var(--space-4) auto 0 auto;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+}
+
+/* ---------- Product detail page ---------- */
+
+.detail-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    animation: cardIn 0.4s ease both;
+}
+
+.detail-image {
+    width: 280px;
+    height: 280px;
+    object-fit: contain;
+    background-color: #eef1f4;
+    border-radius: var(--radius-md);
+}
+
+.detail-info {
+    flex: 1;
+    min-width: 240px;
+}
+
+.detail-info h2 {
+    font-size: 1.5rem;
+}
+
+.detail-info .description {
+    color: var(--color-text-muted);
+}
+
+.detail-actions {
+    margin-top: var(--space-4);
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.danger-zone {
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+
+.btn-danger {
+    background-color: #c0392b;
+    color: var(--color-surface);
+}
+
+.btn-danger:hover {
+    background-color: #a5281b;
+    transform: translateY(-2px);
+}
+
+/* Shown only while the URL fragment is #confirm-delete - a pure CSS
+   confirm step for the (simulated) delete action, no JS involved. */
+.delete-confirm {
+    display: none;
+    margin-top: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background-color: #fdecea;
+    border: 1px solid #c0392b;
+    border-radius: var(--radius-md);
+}
+
+.delete-confirm p {
+    color: var(--color-text);
+}
+
+#confirm-delete:target {
+    display: block;
+}

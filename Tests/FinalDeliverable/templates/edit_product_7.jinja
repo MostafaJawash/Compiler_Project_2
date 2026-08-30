@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="description" content="Edit an existing product."/>
+    <title>Edit Product</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body id="page-edit-product">
+<header class="site-header">
+    <h1>Edit Product</h1>
+    <p class="tagline">Update the details below and save your changes.</p>
+</header>
+<main>
+    <form class="form-card" method="POST" pid="{{ product.id }}" page="{{ product.detail_page }}">
+        <fieldset>
+            <legend>Product Details</legend>
+            <label>Name:</label>
+            <input type="text" name="name" value="{{ product.name }}" required/>
+            <label>Description:</label>
+            <textarea name="description" rows="3">{{ product.description }}</textarea>
+            <label>Price:</label>
+            <input type="text" name="price" value="{{ product.price }}" required/>
+        </fieldset>
+        <button type="submit">Save Changes</button>
+    </form>
+    <p class="summary-card">Editing: {{ product.name }} (current price: ${{ product.price }})</p>
+    <div class="actions-bar">
+        <a class="btn btn-secondary" href="{{ product.detail_page }}">Back to product details</a>
+    </div>
+</main>
+<footer class="site-footer">
+    <p>&#169; 2026 Product Store. All rights reserved.</p>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>

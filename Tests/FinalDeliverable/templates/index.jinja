@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="description" content="Browse our full product catalog."/>
+    <title>Product List</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body id="page-index">
+<header class="site-header">
+    <h1>Our Products</h1>
+    <p class="tagline">Quality gear, picked and priced for every budget.</p>
+</header>
+<main>
+    <section class="products-section">
+        <h2>Catalog</h2>
+        <div class="products">
+            {% for product in products %}
+            <article class="product-card">
+                <img class="product-image" src="{{ product.image_path }}" alt="{{ product.name }}"/>
+                <h3>{{ product.name }}</h3>
+                <p class="description">{{ product.description }}</p>
+                <div class="price-row">
+                    {% if product.price >= 500 %}
+                    <p class="price premium">${{ product.price }} - Premium</p>
+                    {% elif product.price >= 100 %}
+                    <p class="price standard">${{ product.price }} - Standard</p>
+                    {% else %}
+                    <p class="price budget">${{ product.price }} - Budget</p>
+                    {% endif %}
+                    <a class="btn btn-secondary btn-small" href="{{ product.detail_page }}">View Details</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    <div class="actions-bar">
+        <a class="btn btn-primary" href="add_product.html">Add a new product</a>
+    </div>
+</main>
+<footer class="site-footer">
+    <p>&#169; 2026 Product Store. All rights reserved.</p>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
