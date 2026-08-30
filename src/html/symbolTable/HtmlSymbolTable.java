@@ -36,11 +36,24 @@ public class HtmlSymbolTable {
     public void addSymbol(String name, String type, String value, int line) {
         for (HtmlSymbol s : currentScope.symbols) {
             if (s.name.equals(name)) {
-                System.err.println("Error: Symbol '" + name + "' already defined in scope: " + currentScope.name);
+                // Repeated sibling HTML tags are valid markup, so keep the existing
+                // duplicate handling but do not report them as symbol errors.
+                if (!isHtmlTagType(type)) {
+                    System.err.println("Error: Symbol '" + name + "' already defined in scope: " + currentScope.name);
+                }
                 return;
             }
         }
         currentScope.symbols.add(new HtmlSymbol(name, type, value, line));
+    }
+
+    private boolean isHtmlTagType(String type) {
+        return "Html_Element".equals(type)
+                || "Div_Block".equals(type)
+                || "Form_Structure".equals(type)
+                || "Input_Field".equals(type)
+                || "Button_Action".equals(type)
+                || "Text_Area".equals(type);
     }
 
     public HtmlSymbol lookup(String name) {
